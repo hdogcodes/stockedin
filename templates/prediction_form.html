@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Make a prediction — Stockedin{% endblock %}
+{% block content %}
+  <h1>Make a prediction</h1>
+  <p class="empty-state">Resolved automatically against live prices once the target date passes.</p>
+  <form method="post" class="form" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      {{ form.statement.label }}
+      {{ form.statement(size=50, placeholder="NVDA will outperform the S&P 500 in 6 months") }}
+      {% for error in form.statement.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        {{ form.ticker.label }}
+        {{ form.ticker(placeholder="NVDA") }}
+        {% for error in form.ticker.errors %}<p class="error">{{ error }}</p>{% endfor %}
+      </div>
+      <div class="field">
+        {{ form.direction.label }}
+        {{ form.direction() }}
+      </div>
+      <div class="field">
+        {{ form.benchmark.label }}
+        {{ form.benchmark(placeholder="SPY") }}
+        {% for error in form.benchmark.errors %}<p class="error">{{ error }}</p>{% endfor %}
+      </div>
+    </div>
+
+    <div class="field">
+      {{ form.target_date.label }}
+      {{ form.target_date() }}
+      {% for error in form.target_date.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+{% endblock %}

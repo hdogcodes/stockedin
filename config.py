@@ -18,3 +18,12 @@ class Config:
 
     # How long a fetched stock quote stays fresh before we hit the API again.
     PRICE_CACHE_TTL_SECONDS = 300
+
+    # Session cookie hardening. SECURE is env-driven rather than always True:
+    # this app runs over plain http://127.0.0.1 in dev, and a Secure cookie
+    # is silently dropped by the browser on non-HTTPS origins — set
+    # SESSION_COOKIE_SECURE=true in the environment once actually deployed
+    # behind HTTPS.
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = os.environ.get("SESSION_COOKIE_SECURE", "false").lower() == "true"

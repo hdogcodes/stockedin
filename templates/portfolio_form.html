@@ -17,6 +17,34 @@
       {% for error in form.description.errors %}<p class="error">{{ error }}</p>{% endfor %}
     </div>
 
+    <div class="field">
+      {{ form.strategy.label }}
+      {{ form.strategy(size=40, placeholder="e.g. Long-term index + a few high-conviction growth picks") }}
+      {% for error in form.strategy.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        {{ form.risk_level.label }}
+        {{ form.risk_level() }}
+      </div>
+      <div class="field">
+        {{ form.goal.label }}
+        {{ form.goal() }}
+      </div>
+    </div>
+
+    <div class="field">
+      {{ form.tags.label }}
+      <div class="checkbox-tag-list">{{ form.tags() }}</div>
+    </div>
+
+    <div class="field">
+      {{ form.thesis.label }}
+      {{ form.thesis(rows=4, placeholder="Why do you invest this way? What's the reasoning behind your picks?") }}
+      {% for error in form.thesis.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
     {{ form.submit(class="btn btn-primary") }}
   </form>
 {% endblock %}

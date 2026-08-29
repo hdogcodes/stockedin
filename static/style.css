@@ -14,7 +14,7 @@
   --gradient: linear-gradient(135deg, #fb923c 0%, #f97316 55%, #c2410c 100%);
   --shadow: 0 1px 2px rgba(15, 17, 21, 0.04), 0 8px 24px rgba(15, 17, 21, 0.06);
   --shadow-hover: 0 4px 8px rgba(15, 17, 21, 0.06), 0 16px 32px rgba(15, 17, 21, 0.09);
-  --radius: 14px;
+  --radius: 0;
   --wash-1: rgba(249, 115, 22, 0.06);
   --wash-2: rgba(194, 65, 12, 0.05);
   --nav-bg: rgba(255, 255, 255, 0.85);
@@ -55,9 +55,35 @@ html[data-theme="dark"] { color-scheme: dark; }
 
 * { box-sizing: border-box; }
 
-input, textarea, select {
+/* Every real text-entry field gets the same look everywhere, whether it's
+   inside a .field wrapper or a bare form field dropped into a card
+   (discussion post box, join-group code, etc.) — none of them should ever
+   fall back to a native, unstyled browser input. */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="date"],
+textarea,
+select {
+  width: 100%;
   background: var(--card-bg);
   color: var(--text);
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.7rem;
+  font-size: 0.9rem;
+  font-family: inherit;
+  border-radius: 0;
+}
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  border-color: var(--primary);
 }
 
 body {
@@ -112,7 +138,7 @@ body {
   gap: 0.35rem;
   padding: 0.45rem 0.7rem;
   margin-left: 0.15rem;
-  border-radius: 999px;
+  border-radius: 0;
   color: var(--muted);
   text-decoration: none;
   font-size: 0.85rem;
@@ -130,7 +156,7 @@ body {
   font-weight: 700;
   line-height: 1;
   padding: 0.2rem 0.4rem;
-  border-radius: 999px;
+  border-radius: 0;
   min-width: 1.1em;
   text-align: center;
 }
@@ -190,7 +216,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .flashes { margin-bottom: 1rem; }
 .flash {
   padding: 0.6rem 0.9rem;
-  border-radius: 6px;
+  border-radius: 0;
   margin-bottom: 0.5rem;
   font-size: 0.9rem;
 }
@@ -200,19 +226,12 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .form { display: flex; flex-direction: column; gap: 0.9rem; max-width: 420px; }
 .field { display: flex; flex-direction: column; gap: 0.3rem; }
 .field label { font-size: 0.85rem; color: var(--muted); }
-.field input, .field textarea {
-  padding: 0.5rem 0.6rem;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  font-size: 0.95rem;
-  font-family: inherit;
-}
 .error { color: var(--danger); font-size: 0.8rem; margin: 0; }
 
 .btn {
   display: inline-block;
   padding: 0.55rem 1.1rem;
-  border-radius: 999px;
+  border-radius: 0;
   border: none;
   cursor: pointer;
   font-size: 0.85rem;
@@ -245,7 +264,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   padding: 0.25rem 0;
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   max-height: 240px;
   overflow-y: auto;
@@ -351,7 +370,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   border-bottom: 1px solid var(--border);
   font-size: 0.78rem;
   color: var(--muted);
-  border-radius: 6px;
+  border-radius: 0;
 }
 .holding-row:nth-child(even) { background: var(--bg); }
 .holding-row .holding-ticker {
@@ -368,7 +387,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   font-variant-numeric: tabular-nums;
   font-weight: 600;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 0;
 }
 .holding-row .holding-gain.gain { background: var(--gain-bg); color: var(--gain); }
 .holding-row .holding-gain.loss { background: var(--loss-bg); color: var(--loss); }
@@ -381,7 +400,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .like-btn {
   background: none;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.35rem 0.85rem;
   cursor: pointer;
   color: var(--muted);
@@ -412,7 +431,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   resize: none;
   padding: 0.4rem 0.5rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   font-family: inherit;
   font-size: 0.85rem;
 }
@@ -432,7 +451,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   margin: 0 -0.6rem;
   padding-left: 0.6rem;
   padding-right: 0.6rem;
-  border-radius: 8px;
+  border-radius: 0;
 }
 .user-link { text-decoration: none; color: var(--text); display: flex; align-items: center; gap: 0.6rem; }
 .user-link-text { display: flex; flex-direction: column; }
@@ -468,7 +487,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   width: 100%;
   padding: 0.5rem 0.6rem;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   font-size: 0.85rem;
   font-family: inherit;
   margin-bottom: 0.6rem;
@@ -480,7 +499,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   width: 100%;
   background: none;
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 0;
   padding: 0.45rem 0.6rem;
   margin-bottom: 0.5rem;
   font-size: 0.82rem;
@@ -495,7 +514,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   margin-bottom: 0.6rem;
   padding: 0.6rem;
   background: var(--bg);
-  border-radius: 6px;
+  border-radius: 0;
 }
 .stock-filter-panel[hidden] { display: none; }
 
@@ -508,7 +527,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .stock-chip {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  border-radius: 16px;
+  border-radius: 0;
   padding: 0.25rem 0.65rem;
   font-family: var(--font-numeric);
   font-size: 0.75rem;
@@ -695,7 +714,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   color: #fff;
   font-size: 0.7rem;
   font-weight: 700;
-  border-radius: 999px;
+  border-radius: 0;
   padding: 0.15rem 0.5rem;
 }
 
@@ -723,7 +742,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .message-bubble {
   max-width: 70%;
   padding: 0.55rem 0.9rem;
-  border-radius: 16px;
+  border-radius: 0;
   font-size: 0.9rem;
 }
 .message-bubble p { margin: 0; }
@@ -753,7 +772,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   resize: none;
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 0;
   font-family: inherit;
   font-size: 0.9rem;
 }
@@ -956,4 +975,249 @@ a.lb-name:hover { color: var(--primary); }
   .auth-pitch { padding: 2.5rem 1.5rem; }
   .auth-pitch-stats { flex-wrap: wrap; gap: 1.2rem; }
   .auth-form-side { padding: 2rem 1.5rem; max-width: none; margin: 0; }
+}
+
+/* ---- Form layout helpers ---- */
+.field-row { display: flex; gap: 1rem; }
+.field-row .field { flex: 1; }
+.field-group-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 1rem 0 -0.2rem;
+}
+.checkbox-tag-list { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.checkbox-tag-list ul { list-style: none; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.checkbox-tag-list li {
+  /* WTForms' ListWidget renders <input> and <label> as siblings inside
+     <li> (not nested), so the <li> itself has to be the pill container. */
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 0;
+  font-size: 0.82rem;
+}
+.checkbox-tag-list label { cursor: pointer; }
+.checkbox-tag-list input[type="checkbox"] { accent-color: var(--primary); cursor: pointer; }
+
+/* ---- Tag / personality / goal / risk chips (used on cards + explore) ---- */
+.tag-row { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.5rem 0; }
+.tag-chip {
+  font-family: var(--font-numeric);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+  border-radius: 0;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+.personality-chip { background: var(--gain-bg); border-color: transparent; color: var(--gain); }
+.goal-chip { background: var(--loss-bg); border-color: transparent; color: var(--loss); }
+.risk-chip.risk-low { background: var(--gain-bg); border-color: transparent; color: var(--gain); }
+.risk-chip.risk-medium { background: rgba(245, 158, 11, 0.15); border-color: transparent; color: #b45309; }
+.risk-chip.risk-high { background: var(--loss-bg); border-color: transparent; color: var(--loss); }
+
+.post-strategy { color: var(--muted); font-size: 0.85rem; margin: 0.3rem 0; }
+.post-thesis {
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--text);
+  background: var(--bg);
+  border-left: 3px solid var(--primary);
+  padding: 0.5rem 0.8rem;
+  margin: 0.6rem 0;
+  border-radius: 0;
+}
+.profile-university { color: var(--muted); font-size: 0.85rem; margin: 0.2rem 0; }
+
+/* ---- Portfolio activity feed (holding adds, milestones, predictions) ---- */
+.activity-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.6rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.activity-item {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 0.45rem 0.7rem 0.45rem 1rem;
+  border-left: 3px solid var(--border);
+}
+.activity-item strong { color: var(--text); }
+.activity-milestone { border-left-color: var(--gain); color: var(--gain); font-weight: 600; }
+.activity-prediction { border-left-color: var(--primary); }
+
+/* ---- Predictions ---- */
+.prediction-list { list-style: none; padding: 0; margin: 0; }
+.prediction-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.85rem;
+}
+.prediction-row:last-child { border-bottom: none; }
+.prediction-statement { flex: 1; }
+.prediction-date { color: var(--muted); font-size: 0.75rem; white-space: nowrap; }
+.prediction-status {
+  font-family: var(--font-numeric);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 0;
+  white-space: nowrap;
+}
+.status-pending { background: var(--bg); color: var(--muted); border: 1px solid var(--border); }
+.status-correct { background: var(--gain-bg); color: var(--gain); }
+.status-incorrect { background: var(--loss-bg); color: var(--loss); }
+
+/* ---- Track record row under the growth chart ---- */
+.track-record-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem;
+  padding-top: 0.6rem;
+  margin-top: 0.4rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.track-record-stat strong { font-family: var(--font-numeric); color: var(--text); }
+.track-record-note { opacity: 0.75; }
+
+/* ---- Explore ---- */
+.explore-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.2rem;
+}
+.explore-tab {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 0.4rem 0.85rem;
+  border-radius: 0;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-decoration: none;
+  background: var(--card-bg);
+}
+.explore-tab:hover { border-color: var(--primary); color: var(--primary); }
+.explore-tab.active { background: var(--gradient); border-color: transparent; color: #fff; }
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+.explore-card {
+  position: relative;
+  display: block;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem;
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s, transform 0.15s;
+  overflow: hidden;
+}
+.explore-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.explore-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.5rem;
+}
+.explore-card-header > div { display: flex; flex-direction: column; min-width: 0; }
+.explore-card-uni { font-size: 0.72rem; color: var(--muted); }
+.explore-return { margin-left: auto; font-weight: 700; }
+.explore-card-title { margin: 0.2rem 0; font-size: 1rem; }
+.explore-card-strategy { font-size: 0.82rem; color: var(--muted); margin: 0 0 0.5rem; }
+.explore-card-holdings { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.4rem; }
+.explore-card-thesis {
+  font-size: 0.8rem;
+  font-style: italic;
+  color: var(--muted);
+  margin: 0.5rem 0 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ---- Groups ---- */
+.page-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.join-group-card { margin-bottom: 1.2rem; }
+.join-group-form { display: flex; gap: 0.6rem; max-width: 420px; }
+.join-group-form input { flex: 1; }
+
+.group-card {
+  display: block;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem;
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: var(--shadow);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+.group-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-2px); }
+.group-card h3 { margin: 0 0 0.3rem; }
+.group-card p { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.5rem; }
+.group-card-meta { font-size: 0.75rem; color: var(--muted); }
+
+.group-code {
+  font-size: 0.85rem;
+  color: var(--muted);
+  background: var(--bg);
+  padding: 0.4rem 0.8rem;
+  border-radius: 0;
+}
+.group-code strong { font-family: var(--font-numeric); color: var(--text); letter-spacing: 0.05em; }
+
+.group-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 1.5rem;
+  align-items: start;
+}
+.group-main { min-width: 0; }
+.group-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  max-height: 320px;
+  overflow-y: auto;
+}
+.group-message { max-width: 100%; }
+.group-message strong { display: block; font-size: 0.78rem; margin-bottom: 0.1rem; }
+
+@media (max-width: 860px) {
+  .group-layout { grid-template-columns: 1fr; }
 }

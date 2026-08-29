@@ -3,13 +3,22 @@
 from flask import abort, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
+from activity import attach_activity
 from extensions import db
 from forms import CommentForm
 from images import cover_image_for
 from leaderboards import most_held_stocks, top_moving_stocks, top_portfolios
+from milestones import check_milestones
 from models import Comment, Follow, Like, Portfolio, User
+from predictions import resolve_due_predictions
 from prices import attach_stats, get_watchlist_quotes
-from snapshots import get_chart_series, record_snapshot
+from snapshots import (
+    get_benchmark_return_pct,
+    get_chart_series,
+    get_tracking_duration_days,
+    record_benchmark_snapshot,
+    record_snapshot,
+)
 
 
 @login_required
@@ -23,6 +32,7 @@ def feed():
         else []
     )
     attach_stats(portfolios)
+    attach_activity(portfolios)
     comment_form = CommentForm()
     users = (
         User.query.filter(User.id != current_user.id)
@@ -61,13 +71,22 @@ def profile(username):
     user = User.query.filter_by(username=username).first_or_404()
     portfolios = [user.portfolio] if user.portfolio else []
     attach_stats(portfolios)
+    attach_activity(portfolios)
     comment_form = CommentForm()
+    resolve_due_predictions(user.predictions)
 
     chart_series = []
+    tracking_days = 0
+    benchmark_return_pct = None
     if user.portfolio is not None:
-        total_value = portfolios[0].stats.get("total_value")
-        record_snapshot(user.portfolio, total_value)
+        stats = portfolios[0].stats
+        record_snapshot(user.portfolio, stats.get("total_value"))
+        record_benchmark_snapshot()
+        check_milestones(user.portfolio, stats.get("total_gain_loss_pct"))
         chart_series = get_chart_series(user.portfolio)
+        tracking_days = get_tracking_duration_days(user.portfolio)
+        if user.portfolio.snapshots:
+            benchmark_return_pct = get_benchmark_return_pct(user.portfolio.snapshots[0].date)
 
     return render_template(
         "profile.html",
@@ -77,6 +96,8 @@ def profile(username):
         chart_series=chart_series,
         watchlist=get_watchlist_quotes(),
         cover_image=cover_image_for(user.username),
+        tracking_days=tracking_days,
+        benchmark_return_pct=benchmark_return_pct,
     )
 
 

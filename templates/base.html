@@ -29,7 +29,15 @@
       {% if current_user.is_authenticated %}
         <a href="{{ url_for('feed') }}" class="nav-link {{ 'active' if request.endpoint == 'feed' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
-          <span>Feed</span>
+          <span>Home</span>
+        </a>
+        <a href="{{ url_for('explore') }}" class="nav-link {{ 'active' if request.endpoint == 'explore' }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <span>Explore</span>
+        </a>
+        <a href="{{ url_for('groups_home') }}" class="nav-link {{ 'active' if request.endpoint in ('groups_home', 'group_detail', 'group_new', 'group_join') }}">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3"/><path d="M2 20c0-3.3 3.1-6 7-6s7 2.7 7 6"/><circle cx="17" cy="9" r="2.5"/><path d="M17 12.5c2.5 0 5 1.8 5 5"/></svg>
+          <span>Groups</span>
         </a>
         <a href="{{ url_for('news') }}" class="nav-link {{ 'active' if request.endpoint == 'news' }}">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h13a2 2 0 0 1 2 2v13a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2z"/><path d="M8 8h7M8 12h7M8 16h4"/></svg>

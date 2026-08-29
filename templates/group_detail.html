@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}{{ group.name }} — Stockedin{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+  <div class="page-header-row">
+    <div>
+      <h1>{{ group.name }}</h1>
+      {% if group.description %}<p class="profile-bio">{{ group.description }}</p>{% endif %}
+    </div>
+    <span class="group-code">Invite code: <strong>{{ group.code }}</strong></span>
+  </div>
+
+  <div class="group-layout">
+    <div class="group-main">
+      <div class="chart-card">
+        <h2 class="chart-title">Group leaderboard</h2>
+        {% if leaderboard %}
+          <ol class="leaderboard-list">
+            {% for p in leaderboard %}
+              <li>
+                <span class="lb-rank">{{ loop.index }}</span>
+                <a class="lb-name" href="{{ url_for('profile', username=p.owner.username) }}">{{ p.owner.username }}</a>
+                <span class="lb-value {{ 'gain' if p.stats.total_gain_loss_pct >= 0 else 'loss' }}">
+                  {{ "+" if p.stats.total_gain_loss_pct >= 0 else "" }}{{ "%.1f"|format(p.stats.total_gain_loss_pct) }}%
+                </span>
+              </li>
+            {% endfor %}
+          </ol>
+        {% else %}
+          <p class="lb-empty">No priced portfolios in this group yet.</p>
+        {% endif %}
+      </div>
+
+      <div class="chart-card">
+        <h2 class="chart-title">Discussion</h2>
+        <div class="group-messages">
+          {% for m in group.messages %}
+            <div class="message-bubble theirs group-message">
+              <strong>{{ m.user.username }}</strong>
+              <p>{{ m.body }}</p>
+              <span class="message-time">{{ m.created_at.strftime('%b %d, %H:%M') }}</span>
+            </div>
+          {% else %}
+            <p class="lb-empty">No messages yet — say hello.</p>
+          {% endfor %}
+        </div>
+        <form method="post" class="message-form">
+          {{ message_form.hidden_tag() }}
+          {{ message_form.body(placeholder="Post to the group...") }}
+          {{ message_form.submit(class="btn btn-primary") }}
+        </form>
+      </div>
+    </div>
+
+    <aside class="feed-sidebar">
+      <h2 class="sidebar-title">Members</h2>
+      <ul class="user-list">
+        {% for member in members %}
+          <li class="user-row">
+            <a class="user-link" href="{{ url_for('profile', username=member.username) }}">
+              <span class="avatar avatar-sm">{{ member.username[0]|upper }}</span>
+              <span class="user-link-text">
+                <strong>{{ member.username }}</strong>
+                {% if member.id == group.owner_id %}<span class="user-bio">Owner</span>{% endif %}
+              </span>
+            </a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      {% if current_user.id == group.owner_id %}
+        <h2 class="sidebar-title">Invite a friend</h2>
+        <form method="post" action="{{ url_for('group_invite', group_id=group.id) }}">
+          {{ invite_form.hidden_tag() }}
+          {{ invite_form.username(placeholder="username", class="sidebar-search") }}
+          {{ invite_form.submit(class="btn btn-small btn-primary") }}
+          {% for error in invite_form.username.errors %}<p class="error">{{ error }}</p>{% endfor %}
+        </form>
+      {% endif %}
+    </aside>
+  </div>
+{% endblock %}

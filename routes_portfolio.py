@@ -5,7 +5,7 @@ from flask_login import current_user, login_required
 
 from extensions import db
 from forms import HoldingForm, PortfolioForm
-from models import Holding, Portfolio
+from models import Holding, Portfolio, PortfolioUpdate
 from prices import search_symbols
 
 
@@ -17,7 +17,14 @@ def portfolio_new():
     form = PortfolioForm()
     if form.validate_on_submit():
         portfolio = Portfolio(
-            owner=current_user, title=form.title.data, description=form.description.data
+            owner=current_user,
+            title=form.title.data,
+            description=form.description.data,
+            strategy=form.strategy.data or None,
+            risk_level=form.risk_level.data or None,
+            goal=form.goal.data or None,
+            thesis=form.thesis.data or None,
+            tags=",".join(form.tags.data) or None,
         )
         db.session.add(portfolio)
         db.session.commit()
@@ -34,9 +41,16 @@ def portfolio_edit():
         return redirect(url_for("portfolio_new"))
 
     form = PortfolioForm(obj=portfolio)
+    if request.method == "GET":
+        form.tags.data = portfolio.tag_list
     if form.validate_on_submit():
         portfolio.title = form.title.data
         portfolio.description = form.description.data
+        portfolio.strategy = form.strategy.data or None
+        portfolio.risk_level = form.risk_level.data or None
+        portfolio.goal = form.goal.data or None
+        portfolio.thesis = form.thesis.data or None
+        portfolio.tags = ",".join(form.tags.data) or None
         db.session.commit()
         flash("Portfolio updated.", "success")
         return redirect(url_for("profile", username=current_user.username))
@@ -61,6 +75,14 @@ def holding_new():
             buy_date=form.buy_date.data,
         )
         db.session.add(holding)
+        db.session.add(
+            PortfolioUpdate(
+                portfolio_id=portfolio.id,
+                kind="holding_added",
+                ticker=holding.ticker,
+                body=form.reasoning.data or None,
+            )
+        )
         db.session.commit()
         flash(f"Added {holding.ticker} to your portfolio.", "success")
         return redirect(url_for("profile", username=current_user.username))

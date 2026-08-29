@@ -4,12 +4,15 @@ from flask import Flask
 from flask_login import current_user
 
 import routes_auth
+import routes_discover
+import routes_groups
 import routes_messages
 import routes_news
 import routes_portfolio
+import routes_predictions
 import routes_social
 from config import Config
-from extensions import db, login_manager
+from extensions import csrf, db, login_manager
 
 
 def create_app():
@@ -18,12 +21,16 @@ def create_app():
 
     db.init_app(app)
     login_manager.init_app(app)
+    csrf.init_app(app)
 
     routes_auth.register(app)
     routes_portfolio.register(app)
     routes_social.register(app)
     routes_news.register(app)
     routes_messages.register(app)
+    routes_discover.register(app)
+    routes_groups.register(app)
+    routes_predictions.register(app)
 
     @app.context_processor
     def inject_unread_message_count():

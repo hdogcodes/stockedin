@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Explore — Stockedin{% endblock %}
+{% block container_class %}container-wide{% endblock %}
+{% block content %}
+  <h1>Explore</h1>
+
+  <div class="explore-tabs">
+    {% for key, label in tabs %}
+      <a class="explore-tab {{ 'active' if key == active_tab }}" href="{{ url_for('explore', tab=key) }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+
+  {% if portfolios %}
+    <div class="card-grid">
+      {% for p in portfolios %}
+        <a class="explore-card" href="{{ url_for('profile', username=p.owner.username) }}">
+          <div class="explore-card-header">
+            <span class="avatar avatar-sm">{{ p.owner.username[0]|upper }}</span>
+            <div>
+              <strong>{{ p.owner.username }}</strong>
+              {% if p.owner.university %}<span class="explore-card-uni">{{ p.owner.university }}</span>{% endif %}
+            </div>
+            {% if p.stats.total_gain_loss_pct is not none %}
+              <span class="lb-value {{ 'gain' if p.stats.total_gain_loss_pct >= 0 else 'loss' }} explore-return">
+                {{ "+" if p.stats.total_gain_loss_pct >= 0 else "" }}{{ "%.1f"|format(p.stats.total_gain_loss_pct) }}%
+              </span>
+            {% endif %}
+          </div>
+
+          <h3 class="explore-card-title">{{ p.title }}</h3>
+          {% if p.strategy %}<p class="explore-card-strategy">{{ p.strategy }}</p>{% endif %}
+
+          {% if p.holdings %}
+            <div class="explore-card-holdings">
+              {% for h in p.holdings[:5] %}<span class="stock-chip">{{ h.ticker }}</span>{% endfor %}
+            </div>
+          {% endif %}
+
+          {% if p.tag_list or p.personality %}
+            <div class="tag-row">
+              {% for tag in p.tag_list %}<span class="tag-chip">{{ tag }}</span>{% endfor %}
+              {% for tag in p.personality %}<span class="tag-chip personality-chip">{{ tag }}</span>{% endfor %}
+            </div>
+          {% endif %}
+
+          {% if p.thesis %}<p class="explore-card-thesis">&ldquo;{{ p.thesis }}&rdquo;</p>{% endif %}
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state-card">
+      <span class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </span>
+      <p>Nothing here yet.</p>
+    </div>
+  {% endif %}
+{% endblock %}

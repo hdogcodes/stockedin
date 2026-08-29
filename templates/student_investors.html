@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Student Investors — Stockedin{% endblock %}
+{% block content %}
+  <h1>Student Investors</h1>
+
+  {% if same_university %}
+    <h2 class="sidebar-title">Investors at {{ current_user.university }}</h2>
+    <ul class="user-list">
+      {% for u in same_university %}
+        <li class="user-row">
+          <a class="user-link" href="{{ url_for('profile', username=u.username) }}">
+            <span class="avatar avatar-sm">{{ u.username[0]|upper }}</span>
+            <span class="user-link-text">
+              <strong>{{ u.username }}</strong>
+              <span class="user-bio">{{ u.degree }}{% if u.degree and u.grad_year %} &middot; {% endif %}{% if u.grad_year %}Class of {{ u.grad_year }}{% endif %}</span>
+            </span>
+          </a>
+          {% if current_user.is_following(u) %}
+            <form method="post" action="{{ url_for('unfollow', username=u.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-small btn-outline">Unfollow</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('follow', username=u.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-small btn-primary">Follow</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% elif not current_user.university %}
+    <p class="empty-state">
+      Add your university on your <a href="{{ url_for('profile_edit') }}">profile</a> to find investors near you.
+    </p>
+  {% endif %}
+
+  <h2 class="sidebar-title">All student investors</h2>
+  {% if students %}
+    <ul class="user-list">
+      {% for u in students %}
+        <li class="user-row">
+          <a class="user-link" href="{{ url_for('profile', username=u.username) }}">
+            <span class="avatar avatar-sm">{{ u.username[0]|upper }}</span>
+            <span class="user-link-text">
+              <strong>{{ u.username }}</strong>
+              <span class="user-bio">{{ u.university }}{% if u.grad_year %} &middot; Class of {{ u.grad_year }}{% endif %}</span>
+            </span>
+          </a>
+          {% if current_user.is_following(u) %}
+            <form method="post" action="{{ url_for('unfollow', username=u.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-small btn-outline">Unfollow</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('follow', username=u.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button type="submit" class="btn btn-small btn-primary">Follow</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-state">No one has added a university yet.</p>
+  {% endif %}
+{% endblock %}

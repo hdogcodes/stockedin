@@ -17,14 +17,23 @@
       <div class="profile-identity-text">
         <h1>{{ profile_user.username }}</h1>
         {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
+        {% if profile_user.university %}
+          <p class="profile-university">
+            {{ profile_user.university }}{% if profile_user.degree %} &middot; {{ profile_user.degree }}{% endif %}{% if profile_user.grad_year %} &middot; Class of {{ profile_user.grad_year }}{% endif %}
+          </p>
+        {% endif %}
         <p class="profile-stats">
           <strong>{{ profile_user.followers_count }}</strong> followers
           &middot;
           <strong>{{ profile_user.following_count }}</strong> following
+          {% if profile_user.prediction_accuracy is not none %}
+            &middot; <strong>{{ profile_user.prediction_accuracy }}%</strong> prediction accuracy
+          {% endif %}
         </p>
       </div>
       <div class="profile-actions">
         {% if profile_user.id == current_user.id %}
+          <a class="btn btn-outline" href="{{ url_for('profile_edit') }}">Edit profile</a>
           {% if profile_user.portfolio %}
             <a class="btn btn-outline" href="{{ url_for('portfolio_edit') }}">Edit portfolio</a>
             <a class="btn btn-primary" href="{{ url_for('holding_new') }}">Add holding</a>
@@ -37,10 +46,12 @@
           {% endif %}
           {% if current_user.is_following(profile_user) %}
             <form method="post" action="{{ url_for('unfollow', username=profile_user.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="btn btn-outline">Unfollow</button>
             </form>
           {% else %}
             <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="btn btn-primary">Follow</button>
             </form>
           {% endif %}
@@ -59,8 +70,45 @@
           {% endif %}
         </div>
         <div class="portfolio-chart" data-points='{{ chart_series|tojson }}'></div>
+        <div class="track-record-row">
+          <span class="track-record-stat">
+            <strong>{{ tracking_days }}</strong> day{{ "s" if tracking_days != 1 else "" }} tracked
+          </span>
+          {% if benchmark_return_pct is not none and portfolios[0].stats.total_gain_loss_pct is not none %}
+            <span class="track-record-stat">
+              You: <strong class="{{ 'gain' if portfolios[0].stats.total_gain_loss_pct >= 0 else 'loss' }}">{{ "+" if portfolios[0].stats.total_gain_loss_pct >= 0 else "" }}{{ "%.1f"|format(portfolios[0].stats.total_gain_loss_pct) }}%</strong>
+              vs. S&amp;P 500: <strong class="{{ 'gain' if benchmark_return_pct >= 0 else 'loss' }}">{{ "+" if benchmark_return_pct >= 0 else "" }}{{ "%.1f"|format(benchmark_return_pct) }}%</strong>
+              <span class="track-record-note">(since tracking started)</span>
+            </span>
+          {% endif %}
+        </div>
       </div>
     {% endif %}
+
+    {% if profile_user.id == current_user.id or profile_user.predictions %}
+      <div class="chart-card">
+        <div class="chart-card-header">
+          <h2 class="chart-title">Predictions</h2>
+          {% if profile_user.id == current_user.id %}
+            <a class="btn btn-small btn-outline" href="{{ url_for('prediction_new') }}">New prediction</a>
+          {% endif %}
+        </div>
+        {% if profile_user.predictions %}
+          <ul class="prediction-list">
+            {% for pred in profile_user.predictions %}
+              <li class="prediction-row">
+                <span class="prediction-status status-{{ pred.status|lower }}">{{ pred.status }}</span>
+                <span class="prediction-statement">{{ pred.statement }}</span>
+                <span class="prediction-date">by {{ pred.target_date.strftime('%b %d, %Y') }}</span>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="lb-empty">No predictions yet.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+
     {% for portfolio in portfolios %}
       {% include "_post_card.html" %}
     {% endfor %}

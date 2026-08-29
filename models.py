@@ -18,6 +18,11 @@ class User(UserMixin, db.Model):
     bio = db.Column(db.String(200))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    # All optional — "student investor" identity, not a requirement to sign up.
+    university = db.Column(db.String(120), index=True)
+    degree = db.Column(db.String(120))
+    grad_year = db.Column(db.Integer)
+
     # Each user has at most one portfolio (uselist=False makes this one-to-one).
     portfolio = db.relationship(
         "Portfolio",
@@ -28,6 +33,15 @@ class User(UserMixin, db.Model):
     likes = db.relationship("Like", back_populates="user", cascade="all, delete-orphan")
     comments = db.relationship(
         "Comment", back_populates="user", cascade="all, delete-orphan"
+    )
+    predictions = db.relationship(
+        "Prediction",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        order_by="Prediction.created_at.desc()",
+    )
+    group_memberships = db.relationship(
+        "GroupMembership", back_populates="user", cascade="all, delete-orphan"
     )
 
     # Follow rows where this user is the one doing the following.
@@ -80,6 +94,23 @@ class User(UserMixin, db.Model):
         return Message.query.filter_by(recipient_id=self.id, read_at=None).count()
 
     @property
+    def is_student(self):
+        return bool(self.university)
+
+    @property
+    def groups(self):
+        return [m.group for m in self.group_memberships]
+
+    @property
+    def prediction_accuracy(self):
+        """(correct, total_resolved) — None share when nothing's resolved yet."""
+        resolved = [p for p in self.predictions if p.status != "Pending"]
+        if not resolved:
+            return None
+        correct = sum(1 for p in resolved if p.status == "Correct")
+        return round(correct / len(resolved) * 100)
+
+    @property
     def following_count(self):
         return Follow.query.filter_by(follower_id=self.id).count()
 
@@ -104,6 +135,17 @@ class Portfolio(db.Model):
     description = db.Column(db.String(300))
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
+    # Strategy/identity fields — all optional, upgrade a bare holdings list
+    # into something you can discover and follow for its reasoning.
+    strategy = db.Column(db.String(120))
+    risk_level = db.Column(db.String(20))
+    goal = db.Column(db.String(40))
+    thesis = db.Column(db.Text)
+    # Comma-separated tag strings (e.g. "🚀 Growth,🤖 AI") rather than a
+    # separate join table — the tag set is small and fixed, so filtering in
+    # Python is simple and plenty fast at this app's scale.
+    tags = db.Column(db.String(200))
+
     owner = db.relationship("User", back_populates="portfolio")
     holdings = db.relationship(
         "Holding",
@@ -126,6 +168,12 @@ class Portfolio(db.Model):
         cascade="all, delete-orphan",
         order_by="PortfolioSnapshot.date",
     )
+    updates = db.relationship(
+        "PortfolioUpdate",
+        back_populates="portfolio",
+        cascade="all, delete-orphan",
+        order_by="PortfolioUpdate.created_at.desc()",
+    )
 
     @property
     def like_count(self):
@@ -135,6 +183,15 @@ class Portfolio(db.Model):
         if user is None or not user.is_authenticated:
             return False
         return any(like.user_id == user.id for like in self.likes)
+
+    @property
+    def tag_list(self):
+        return [t for t in (self.tags or "").split(",") if t]
+
+    @property
+    def personality(self):
+        from personality import compute_personality
+        return compute_personality(self)
 
     def __repr__(self):
         return f"<Portfolio {self.title!r} of user {self.user_id}>"
@@ -239,6 +296,129 @@ class PortfolioSnapshot(db.Model):
     __table_args__ = (
         db.UniqueConstraint("portfolio_id", "date", name="one_snapshot_per_day"),
     )
+
+
+class BenchmarkSnapshot(db.Model):
+    """Same idea as PortfolioSnapshot but for a market index/ETF ticker
+    (default SPY), so "your return vs. the S&P 500" has real recorded data
+    to compare against instead of needing historical-candle API access."""
+
+    __tablename__ = "benchmark_snapshots"
+
+    id = db.Column(db.Integer, primary_key=True)
+    ticker = db.Column(db.String(12), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+
+    __table_args__ = (
+        db.UniqueConstraint("ticker", "date", name="one_benchmark_snapshot_per_day"),
+    )
+
+
+class PortfolioUpdate(db.Model):
+    """A timeline entry for a portfolio: a holding added (with optional
+    reasoning), an auto-detected milestone, or a free-text note. Powers the
+    "portfolio activity" feed alongside likes/comments."""
+
+    __tablename__ = "portfolio_updates"
+
+    id = db.Column(db.Integer, primary_key=True)
+    portfolio_id = db.Column(
+        db.Integer, db.ForeignKey("portfolios.id"), nullable=False
+    )
+    kind = db.Column(db.String(20), nullable=False)  # holding_added / milestone / note
+    ticker = db.Column(db.String(12))
+    body = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    portfolio = db.relationship("Portfolio", back_populates="updates")
+
+
+class Prediction(db.Model):
+    """A trackable, resolvable call: "<ticker> will <direction> <benchmark>
+    by <target_date>". Baseline prices are captured at creation time;
+    resolution (Correct/Incorrect) is computed lazily once target_date has
+    passed, using live prices at that point — see predictions.py."""
+
+    __tablename__ = "predictions"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    ticker = db.Column(db.String(12), nullable=False)
+    benchmark = db.Column(db.String(12), nullable=False, default="SPY")
+    direction = db.Column(db.String(12), nullable=False, default="outperform")
+    statement = db.Column(db.String(280), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    target_date = db.Column(db.Date, nullable=False)
+
+    baseline_ticker_price = db.Column(db.Float)
+    baseline_benchmark_price = db.Column(db.Float)
+
+    status = db.Column(db.String(12), nullable=False, default="Pending")
+    resolved_at = db.Column(db.DateTime)
+    resolved_ticker_price = db.Column(db.Float)
+    resolved_benchmark_price = db.Column(db.Float)
+
+    user = db.relationship("User", back_populates="predictions")
+
+
+class Group(db.Model):
+    """A private group of friends who can see each other's portfolios,
+    discuss, and compare performance on a leaderboard."""
+
+    __tablename__ = "groups"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(80), nullable=False)
+    description = db.Column(db.String(300))
+    code = db.Column(db.String(10), unique=True, nullable=False, index=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    owner = db.relationship("User", foreign_keys=[owner_id])
+    memberships = db.relationship(
+        "GroupMembership",
+        back_populates="group",
+        cascade="all, delete-orphan",
+        order_by="GroupMembership.joined_at",
+    )
+    messages = db.relationship(
+        "GroupMessage",
+        back_populates="group",
+        cascade="all, delete-orphan",
+        order_by="GroupMessage.created_at",
+    )
+
+    @property
+    def members(self):
+        return [m.user for m in self.memberships]
+
+    def has_member(self, user):
+        return user is not None and any(m.user_id == user.id for m in self.memberships)
+
+
+class GroupMembership(db.Model):
+    __tablename__ = "group_memberships"
+
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), primary_key=True)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    group = db.relationship("Group", back_populates="memberships")
+    user = db.relationship("User", back_populates="group_memberships")
+
+
+class GroupMessage(db.Model):
+    __tablename__ = "group_messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    group_id = db.Column(db.Integer, db.ForeignKey("groups.id"), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    body = db.Column(db.String(500), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    group = db.relationship("Group", back_populates="messages")
+    user = db.relationship("User")
 
 
 class Message(db.Model):

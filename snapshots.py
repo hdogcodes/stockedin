@@ -11,8 +11,10 @@ what you put in" anchor that the real, price-based snapshots grow away from.
 
 from datetime import date
 
+from constants import DEFAULT_BENCHMARK
 from extensions import db
-from models import PortfolioSnapshot
+from models import BenchmarkSnapshot, PortfolioSnapshot
+from prices import get_quote
 
 
 def record_snapshot(portfolio, total_value):
@@ -53,3 +55,47 @@ def get_chart_series(portfolio):
         {"date": d.strftime("%Y-%m-%d"), "value": round(v, 2)}
         for d, v in sorted(points.items())
     ]
+
+
+def get_tracking_duration_days(portfolio):
+    """Days since the first recorded snapshot — the "verifiable" part of the
+    track record, as opposed to the earliest (unverifiable, self-reported)
+    buy date on a holding."""
+    if not portfolio.snapshots:
+        return 0
+    return (date.today() - portfolio.snapshots[0].date).days
+
+
+def record_benchmark_snapshot(ticker=DEFAULT_BENCHMARK):
+    """Same upsert-today's-value pattern as record_snapshot, for a market
+    index/ETF ticker. Builds up real historical data for benchmark
+    comparison going forward, since Finnhub's free tier doesn't give us
+    historical candles to backfill with."""
+    quote = get_quote(ticker)
+    if quote is None:
+        return
+
+    today = date.today()
+    existing = BenchmarkSnapshot.query.filter_by(ticker=ticker, date=today).first()
+    if existing:
+        existing.price = quote["price"]
+    else:
+        db.session.add(BenchmarkSnapshot(ticker=ticker, date=today, price=quote["price"]))
+    db.session.commit()
+
+
+def get_benchmark_return_pct(since_date, ticker=DEFAULT_BENCHMARK):
+    """% change in the benchmark's recorded price from since_date to the
+    most recent snapshot. None if we don't have at least two points yet."""
+    rows = (
+        BenchmarkSnapshot.query.filter_by(ticker=ticker)
+        .filter(BenchmarkSnapshot.date >= since_date)
+        .order_by(BenchmarkSnapshot.date)
+        .all()
+    )
+    if len(rows) < 2:
+        return None
+    start, end = rows[0].price, rows[-1].price
+    if not start:
+        return None
+    return (end - start) / start * 100

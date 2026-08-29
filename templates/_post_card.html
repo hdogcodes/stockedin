@@ -10,6 +10,20 @@
 
   <h3 class="post-title">{{ portfolio.title }}</h3>
   {% if portfolio.description %}<p class="post-description">{{ portfolio.description }}</p>{% endif %}
+  {% if portfolio.strategy %}<p class="post-strategy">{{ portfolio.strategy }}</p>{% endif %}
+
+  {% if portfolio.tag_list or portfolio.personality or portfolio.goal or portfolio.risk_level %}
+    <div class="tag-row">
+      {% for tag in portfolio.tag_list %}<span class="tag-chip">{{ tag }}</span>{% endfor %}
+      {% for tag in portfolio.personality %}<span class="tag-chip personality-chip">{{ tag }}</span>{% endfor %}
+      {% if portfolio.goal %}<span class="tag-chip goal-chip">{{ portfolio.goal }}</span>{% endif %}
+      {% if portfolio.risk_level %}<span class="tag-chip risk-chip risk-{{ portfolio.risk_level|lower }}">{{ portfolio.risk_level }} risk</span>{% endif %}
+    </div>
+  {% endif %}
+
+  {% if portfolio.thesis %}
+    <p class="post-thesis">&ldquo;{{ portfolio.thesis }}&rdquo;</p>
+  {% endif %}
 
   {% if portfolio.stats.rows %}
     {% if portfolio.stats.total_gain_loss_pct is not none %}
@@ -39,6 +53,7 @@
           {% if portfolio.owner.id == current_user.id %}
             <form method="post" action="{{ url_for('holding_delete', holding_id=row.holding.id) }}"
                   onsubmit="return confirm('Remove {{ row.holding.ticker }}?');">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
               <button type="submit" class="btn-link">remove</button>
             </form>
           {% endif %}
@@ -47,6 +62,26 @@
     </ul>
   {% else %}
     <p class="empty-holdings">No holdings yet.</p>
+  {% endif %}
+
+  {% if portfolio.recent_activity is defined and portfolio.recent_activity %}
+    <ul class="activity-list">
+      {% for item in portfolio.recent_activity %}
+        <li class="activity-item activity-{{ item.kind }}">
+          {% if item.kind == "holding_added" %}
+            <span>Added <strong>{{ item.ticker }}</strong>{% if item.body %} &mdash; {{ item.body }}{% endif %}</span>
+          {% elif item.kind == "milestone" %}
+            <span>{{ item.body }}</span>
+          {% elif item.kind == "prediction" %}
+            <span>{{ item.body }}
+              <span class="prediction-status status-{{ item.status|lower }}">{{ item.status }}</span>
+            </span>
+          {% else %}
+            <span>{{ item.body }}</span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
   {% endif %}
 
   <div class="post-actions">
