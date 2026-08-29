@@ -26,6 +26,10 @@ def feed():
         .order_by(User.username)
         .all()
     )
+    for user in users:
+        user.held_tickers = (
+            sorted({h.ticker for h in user.portfolio.holdings}) if user.portfolio else []
+        )
     return render_template(
         "feed.html", portfolios=portfolios, comment_form=comment_form, users=users
     )

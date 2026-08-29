@@ -114,19 +114,61 @@ const friendSearch = document.getElementById("friend-search");
 if (friendSearch) {
   const rows = Array.from(document.querySelectorAll("#friend-list .user-row"));
   const emptyState = document.getElementById("friend-search-empty");
+  const stockFilterInput = document.getElementById("stock-filter-input");
+  const stockChips = Array.from(document.querySelectorAll(".stock-chip"));
+  const activeTickers = new Set();
 
-  friendSearch.addEventListener("input", () => {
-    const query = friendSearch.value.trim().toLowerCase();
+  function applyFilters() {
+    const nameQuery = friendSearch.value.trim().toLowerCase();
+    const customQuery = stockFilterInput ? stockFilterInput.value.trim().toLowerCase() : "";
+    const tickerQueries = [...activeTickers].map((t) => t.toLowerCase());
+    if (customQuery) tickerQueries.push(customQuery);
     let visibleCount = 0;
 
     rows.forEach((row) => {
-      const matches = row.dataset.username.includes(query);
+      const nameMatches = row.dataset.username.includes(nameQuery);
+      const tickers = row.dataset.tickers.split(",").filter(Boolean);
+      // Multi-select is OR: a user matches if they hold ANY selected/typed ticker.
+      const tickerMatches =
+        tickerQueries.length === 0 ||
+        tickerQueries.some((q) => tickers.some((t) => t.includes(q)));
+      const matches = nameMatches && tickerMatches;
       row.hidden = !matches;
       if (matches) visibleCount += 1;
     });
 
     if (emptyState) emptyState.hidden = visibleCount !== 0;
+  }
+
+  friendSearch.addEventListener("input", applyFilters);
+
+  const filterToggle = document.getElementById("stock-filter-toggle");
+  const filterPanel = document.getElementById("stock-filter-panel");
+  if (filterToggle && filterPanel) {
+    filterToggle.addEventListener("click", () => {
+      const expanded = filterToggle.getAttribute("aria-expanded") === "true";
+      filterToggle.setAttribute("aria-expanded", String(!expanded));
+      filterPanel.hidden = expanded;
+    });
+  }
+
+  stockChips.forEach((chip) => {
+    chip.addEventListener("click", () => {
+      const ticker = chip.dataset.ticker;
+      if (activeTickers.has(ticker)) {
+        activeTickers.delete(ticker);
+        chip.classList.remove("active");
+      } else {
+        activeTickers.add(ticker);
+        chip.classList.add("active");
+      }
+      applyFilters();
+    });
   });
+
+  if (stockFilterInput) {
+    stockFilterInput.addEventListener("input", applyFilters);
+  }
 }
 
 document.addEventListener("click", async (event) => {

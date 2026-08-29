@@ -25,13 +25,41 @@
         placeholder="Search by username..."
         autocomplete="off"
       >
+
+      <button
+        type="button"
+        id="stock-filter-toggle"
+        class="stock-filter-toggle"
+        aria-expanded="false"
+        aria-controls="stock-filter-panel"
+      >
+        Filter by stock held <span class="stock-filter-caret">&#9662;</span>
+      </button>
+      <div class="stock-filter-panel" id="stock-filter-panel" hidden>
+        <div class="stock-chip-row" id="stock-chip-row">
+          {% for ticker in ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA"] %}
+            <button type="button" class="stock-chip" data-ticker="{{ ticker }}">{{ ticker }}</button>
+          {% endfor %}
+        </div>
+        <input
+          type="text"
+          id="stock-filter-input"
+          class="sidebar-search"
+          placeholder="Or search another ticker..."
+          autocomplete="off"
+        >
+      </div>
+
       {% if users %}
         <ul class="user-list sidebar-user-list" id="friend-list">
           {% for user in users %}
-            <li class="user-row" data-username="{{ user.username|lower }}">
+            <li class="user-row" data-username="{{ user.username|lower }}" data-tickers="{{ user.held_tickers|join(',')|lower }}">
               <a class="user-link" href="{{ url_for('profile', username=user.username) }}">
                 <strong>{{ user.username }}</strong>
                 {% if user.bio %}<span class="user-bio">{{ user.bio }}</span>{% endif %}
+                {% if user.held_tickers %}
+                  <span class="user-holdings">{{ user.held_tickers|join(', ') }}</span>
+                {% endif %}
               </a>
               {% if current_user.is_following(user) %}
                 <form method="post" action="{{ url_for('unfollow', username=user.username) }}">
