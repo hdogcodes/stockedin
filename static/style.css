@@ -921,7 +921,7 @@ a.lb-name:hover { color: var(--primary); }
 .container-auth { max-width: none; padding: 0; }
 .auth-layout {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: 2fr 1fr;
   min-height: calc(100vh - 57px);
 }
 .auth-pitch {
@@ -945,8 +945,9 @@ a.lb-name:hover { color: var(--primary); }
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 2rem 3rem;
-  max-width: 460px;
+  padding: 2rem 2.5rem;
+  margin: 0 auto;
+  max-width: 300px;
 }
 .auth-form-side h2 { font-size: 1.5rem; margin: 0 0 1.2rem; }
 
@@ -954,5 +955,5 @@ a.lb-name:hover { color: var(--primary); }
   .auth-layout { grid-template-columns: 1fr; }
   .auth-pitch { padding: 2.5rem 1.5rem; }
   .auth-pitch-stats { flex-wrap: wrap; gap: 1.2rem; }
-  .auth-form-side { padding: 2rem 1.5rem; max-width: none; }
+  .auth-form-side { padding: 2rem 1.5rem; max-width: none; margin: 0; }
 }

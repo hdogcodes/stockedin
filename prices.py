@@ -208,8 +208,10 @@ def search_symbols(query):
         if not symbol or not description or symbol in seen:
             continue
         # Skip non-tradeable derivatives (warrants, index entries, etc.) so
-        # the dropdown stays focused on things you can actually hold shares of.
-        if item.get("type") not in ("Common Stock", ""):
+        # the dropdown stays focused on things you can actually hold shares
+        # of. "ETP" is Finnhub's type for ETFs (e.g. VTI, SPY, QQQ) — common
+        # holdings that must stay included alongside plain common stock.
+        if item.get("type") not in ("Common Stock", "ETP", ""):
             continue
         seen.add(symbol)
         results.append({"symbol": symbol, "description": description})
