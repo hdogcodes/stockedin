@@ -11,6 +11,13 @@ or malformed responses. Get a free key at https://finnhub.io/register and
 set FINNHUB_API_KEY in .env (60 requests/min on the free tier, which this
 app's caching stays well under).
 
+Requests go to api.finnhub.io rather than the bare finnhub.io domain used in
+Finnhub's own docs — some free-tier hosts (e.g. PythonAnywhere) proxy-filter
+outbound traffic from the web app process to an allowlist of hostnames, and
+api.finnhub.io is the variant that's actually on that list; the bare domain
+gets silently blocked (which looks identical to a network failure, since
+_fetch() below swallows all exceptions).
+
 Two things make this fast enough to call on every page render:
   - REQUEST_TIMEOUT_SECONDS bounds each HTTP call. Without it, the requests
     library waits indefinitely, so one unreachable/slow lookup can hang a
@@ -31,8 +38,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY", "")
-FINNHUB_QUOTE_URL = "https://finnhub.io/api/v1/quote"
-FINNHUB_SEARCH_URL = "https://finnhub.io/api/v1/search"
+FINNHUB_QUOTE_URL = "https://api.finnhub.io/api/v1/quote"
+FINNHUB_SEARCH_URL = "https://api.finnhub.io/api/v1/search"
 
 # ticker -> (quote_dict_or_None, fetched_at_epoch)
 _cache = {}

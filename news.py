@@ -15,7 +15,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY", "")
-FINNHUB_NEWS_URL = "https://finnhub.io/api/v1/news"
+# api.finnhub.io (not the bare finnhub.io from Finnhub's own docs) — see the
+# note in prices.py on hosts that proxy-filter web app traffic to an
+# allowlist that only covers the api. subdomain.
+FINNHUB_NEWS_URL = "https://api.finnhub.io/api/v1/news"
 REQUEST_TIMEOUT_SECONDS = 4
 
 _cache = {"articles": None, "fetched_at": 0}
