@@ -1,0 +1,101 @@
+{# Expects: portfolio (with .stats attached via prices.attach_stats), comment_form #}
+<article class="post-card" id="portfolio-{{ portfolio.id }}">
+  <header class="post-header">
+    <a class="post-owner" href="{{ url_for('profile', username=portfolio.owner.username) }}">
+      {{ portfolio.owner.username }}
+    </a>
+    <span class="post-date">{{ portfolio.created_at.strftime('%b %d, %Y') }}</span>
+  </header>
+
+  <h3 class="post-title">{{ portfolio.title }}</h3>
+  {% if portfolio.description %}<p class="post-description">{{ portfolio.description }}</p>{% endif %}
+
+  {% if portfolio.stats.rows %}
+    <table class="holdings-table">
+      <thead>
+        <tr>
+          <th>Ticker</th>
+          <th>Shares</th>
+          <th>Buy price</th>
+          <th>Price</th>
+          <th>Value</th>
+          <th>Gain/Loss</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in portfolio.stats.rows %}
+          <tr>
+            <td>{{ row.holding.ticker }}</td>
+            <td>{{ row.holding.shares }}</td>
+            <td>${{ "%.2f"|format(row.holding.buy_price) }}</td>
+            {% if row.available %}
+              <td>${{ "%.2f"|format(row.current_price) }}</td>
+              <td>${{ "%.2f"|format(row.current_value) }}</td>
+              <td class="{{ 'gain' if row.gain_loss >= 0 else 'loss' }}">
+                {{ "+" if row.gain_loss >= 0 else "" }}${{ "%.2f"|format(row.gain_loss) }}
+                ({{ "%.1f"|format(row.gain_loss_pct) }}%)
+              </td>
+            {% else %}
+              <td colspan="3" class="unavailable">price unavailable</td>
+            {% endif %}
+            {% if portfolio.owner.id == current_user.id %}
+              <td>
+                <form method="post" action="{{ url_for('holding_delete', holding_id=row.holding.id) }}"
+                      onsubmit="return confirm('Remove {{ row.holding.ticker }}?');">
+                  <button type="submit" class="btn-link">remove</button>
+                </form>
+              </td>
+            {% endif %}
+          </tr>
+        {% endfor %}
+      </tbody>
+      {% if portfolio.stats.total_gain_loss_pct is not none %}
+        <tfoot>
+          <tr>
+            <td colspan="4"><strong>Total</strong></td>
+            <td><strong>${{ "%.2f"|format(portfolio.stats.total_value) }}</strong></td>
+            <td class="{{ 'gain' if portfolio.stats.total_gain_loss >= 0 else 'loss' }}">
+              <strong>
+                {{ "+" if portfolio.stats.total_gain_loss >= 0 else "" }}${{ "%.2f"|format(portfolio.stats.total_gain_loss) }}
+                ({{ "%.1f"|format(portfolio.stats.total_gain_loss_pct) }}%)
+              </strong>
+            </td>
+          </tr>
+        </tfoot>
+      {% endif %}
+    </table>
+  {% else %}
+    <p class="empty-holdings">No holdings yet.</p>
+  {% endif %}
+
+  <div class="post-actions">
+    <button
+      type="button"
+      class="like-btn {{ 'liked' if portfolio.is_liked_by(current_user) else '' }}"
+      data-portfolio-id="{{ portfolio.id }}"
+      data-liked="{{ 'true' if portfolio.is_liked_by(current_user) else 'false' }}"
+    >
+      <span class="like-icon">&hearts;</span>
+      <span class="like-count">{{ portfolio.like_count }}</span>
+    </button>
+  </div>
+
+  <div class="comments" data-portfolio-id="{{ portfolio.id }}">
+    <ul class="comment-list">
+      {% for comment in portfolio.comments %}
+        <li class="comment">
+          <a href="{{ url_for('profile', username=comment.user.username) }}">{{ comment.user.username }}</a>
+          <span class="comment-body">{{ comment.body }}</span>
+          <span class="comment-date">{{ comment.created_at.strftime('%b %d, %Y %H:%M') }}</span>
+        </li>
+      {% endfor %}
+    </ul>
+
+    <form class="comment-form" data-portfolio-id="{{ portfolio.id }}">
+      {{ comment_form.hidden_tag() }}
+      {{ comment_form.body(placeholder="Add a comment...", rows=1) }}
+      <button type="submit" class="btn btn-small">Post</button>
+      <p class="error comment-error" hidden></p>
+    </form>
+  </div>
+</article>

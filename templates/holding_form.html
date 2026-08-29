@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Add holding — Portfolio Social{% endblock %}
+{% block content %}
+  <h1>Add a holding</h1>
+  <form method="post" class="form" novalidate>
+    {{ form.hidden_tag() }}
+
+    <div class="field">
+      {{ form.ticker.label }}
+      {{ form.ticker(size=12, placeholder="e.g. AAPL") }}
+      {% for error in form.ticker.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.shares.label }}
+      {{ form.shares() }}
+      {% for error in form.shares.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.buy_price.label }}
+      {{ form.buy_price() }}
+      {% for error in form.buy_price.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    <div class="field">
+      {{ form.buy_date.label }}
+      {{ form.buy_date() }}
+      {% for error in form.buy_date.errors %}<p class="error">{{ error }}</p>{% endfor %}
+    </div>
+
+    {{ form.submit(class="btn btn-primary") }}
+  </form>
+{% endblock %}

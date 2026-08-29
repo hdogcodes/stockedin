@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} — Portfolio Social{% endblock %}
+{% block content %}
+  <header class="profile-header">
+    <div>
+      <h1>{{ profile_user.username }}</h1>
+      {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
+      <p class="profile-stats">
+        <strong>{{ profile_user.followers_count }}</strong> followers
+        &middot;
+        <strong>{{ profile_user.following_count }}</strong> following
+      </p>
+    </div>
+    <div class="profile-actions">
+      {% if profile_user.id == current_user.id %}
+        {% if profile_user.portfolio %}
+          <a class="btn btn-outline" href="{{ url_for('portfolio_edit') }}">Edit portfolio</a>
+          <a class="btn btn-primary" href="{{ url_for('holding_new') }}">Add holding</a>
+        {% else %}
+          <a class="btn btn-primary" href="{{ url_for('portfolio_new') }}">Create your portfolio</a>
+        {% endif %}
+      {% elif current_user.is_following(profile_user) %}
+        <form method="post" action="{{ url_for('unfollow', username=profile_user.username) }}">
+          <button type="submit" class="btn btn-outline">Unfollow</button>
+        </form>
+      {% else %}
+        <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
+          <button type="submit" class="btn btn-primary">Follow</button>
+        </form>
+      {% endif %}
+    </div>
+  </header>
+
+  {% if portfolios %}
+    {% for portfolio in portfolios %}
+      {% include "_post_card.html" %}
+    {% endfor %}
+  {% else %}
+    <p class="empty-state">
+      {% if profile_user.id == current_user.id %}
+        You haven't created a portfolio yet.
+      {% else %}
+        {{ profile_user.username }} hasn't created a portfolio yet.
+      {% endif %}
+    </p>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Feed — Portfolio Social{% endblock %}
+{% block content %}
+  <h1>Your feed</h1>
+  {% if portfolios %}
+    {% for portfolio in portfolios %}
+      {% include "_post_card.html" %}
+    {% endfor %}
+  {% else %}
+    <p class="empty-state">
+      You're not following anyone yet.
+      <a href="{{ url_for('explore') }}">Find people to follow</a>.
+    </p>
+  {% endif %}
+{% endblock %}

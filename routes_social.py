@@ -1,0 +1,135 @@
+"""Feed, explore, profile, follow/unfollow, and AJAX like/comment views."""
+
+from flask import abort, flash, jsonify, redirect, render_template, url_for
+from flask_login import current_user, login_required
+
+from extensions import db
+from forms import CommentForm
+from models import Comment, Follow, Like, Portfolio, User
+from prices import attach_stats
+
+
+@login_required
+def feed():
+    followed_ids = [f.followed_id for f in current_user.following]
+    portfolios = (
+        Portfolio.query.filter(Portfolio.user_id.in_(followed_ids))
+        .order_by(Portfolio.created_at.desc())
+        .all()
+        if followed_ids
+        else []
+    )
+    attach_stats(portfolios)
+    comment_form = CommentForm()
+    return render_template(
+        "feed.html", portfolios=portfolios, comment_form=comment_form
+    )
+
+
+@login_required
+def explore():
+    users = (
+        User.query.filter(User.id != current_user.id)
+        .order_by(User.username)
+        .all()
+    )
+    return render_template("explore.html", users=users)
+
+
+@login_required
+def profile(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    portfolios = [user.portfolio] if user.portfolio else []
+    attach_stats(portfolios)
+    comment_form = CommentForm()
+    return render_template(
+        "profile.html", profile_user=user, portfolios=portfolios, comment_form=comment_form
+    )
+
+
+@login_required
+def follow(username):
+    target = User.query.filter_by(username=username).first_or_404()
+    if target.id == current_user.id:
+        flash("You can't follow yourself.", "error")
+        return redirect(url_for("profile", username=username))
+
+    already = Follow.query.filter_by(
+        follower_id=current_user.id, followed_id=target.id
+    ).first()
+    if not already:
+        db.session.add(Follow(follower_id=current_user.id, followed_id=target.id))
+        db.session.commit()
+
+    return redirect(url_for("profile", username=username))
+
+
+@login_required
+def unfollow(username):
+    target = User.query.filter_by(username=username).first_or_404()
+    Follow.query.filter_by(
+        follower_id=current_user.id, followed_id=target.id
+    ).delete()
+    db.session.commit()
+    return redirect(url_for("profile", username=username))
+
+
+@login_required
+def like_portfolio(portfolio_id):
+    portfolio = db.session.get(Portfolio, portfolio_id)
+    if portfolio is None:
+        abort(404)
+
+    existing = Like.query.filter_by(
+        user_id=current_user.id, portfolio_id=portfolio.id
+    ).first()
+    if existing:
+        db.session.delete(existing)
+        liked = False
+    else:
+        db.session.add(Like(user_id=current_user.id, portfolio_id=portfolio.id))
+        liked = True
+    db.session.commit()
+
+    like_count = Like.query.filter_by(portfolio_id=portfolio.id).count()
+    return jsonify({"liked": liked, "like_count": like_count})
+
+
+@login_required
+def comment_portfolio(portfolio_id):
+    portfolio = db.session.get(Portfolio, portfolio_id)
+    if portfolio is None:
+        abort(404)
+
+    form = CommentForm()
+    if not form.validate_on_submit():
+        errors = [msg for field_errors in form.errors.values() for msg in field_errors]
+        return jsonify({"error": errors[0] if errors else "Invalid comment."}), 400
+
+    comment = Comment(user_id=current_user.id, portfolio_id=portfolio.id, body=form.body.data)
+    db.session.add(comment)
+    db.session.commit()
+
+    return jsonify(
+        {
+            "username": current_user.username,
+            "body": comment.body,
+            "created_at": comment.created_at.strftime("%b %d, %Y %H:%M"),
+        }
+    )
+
+
+def register(app):
+    app.add_url_rule("/", view_func=feed)
+    app.add_url_rule("/explore", view_func=explore)
+    app.add_url_rule("/user/<username>", view_func=profile)
+    app.add_url_rule("/follow/<username>", view_func=follow, methods=["POST"])
+    app.add_url_rule("/unfollow/<username>", view_func=unfollow, methods=["POST"])
+    app.add_url_rule(
+        "/portfolio/<int:portfolio_id>/like", view_func=like_portfolio, methods=["POST"]
+    )
+    app.add_url_rule(
+        "/portfolio/<int:portfolio_id>/comment",
+        view_func=comment_portfolio,
+        methods=["POST"],
+    )
