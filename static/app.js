@@ -8,9 +8,13 @@ function getCsrfToken(form) {
   return input ? input.value : null;
 }
 
-const tickerInput = document.getElementById("ticker-input");
-if (tickerInput) {
-  const suggestionsList = document.getElementById("ticker-suggestions");
+// Wires a ticker/company-name autocomplete dropdown onto any text input.
+// Used by both the add-holding form's ticker field and the sidebar's
+// stock-filter search — each gets its own independent debounce/nav state.
+function attachTickerAutocomplete(inputEl, suggestionsList, onSelect) {
+  if (!inputEl || !suggestionsList) return;
+
+  const selectSymbol = onSelect || ((symbol) => { inputEl.value = symbol; });
   let debounceTimer = null;
   let activeIndex = -1;
   let currentResults = [];
@@ -47,7 +51,7 @@ if (tickerInput) {
       li.addEventListener("mousedown", (event) => {
         // mousedown (not click) fires before the input's blur handler closes the list.
         event.preventDefault();
-        tickerInput.value = item.symbol;
+        selectSymbol(item.symbol);
         closeSuggestions();
       });
       suggestionsList.appendChild(li);
@@ -64,8 +68,8 @@ if (tickerInput) {
     }
   }
 
-  tickerInput.addEventListener("input", () => {
-    const query = tickerInput.value.trim();
+  inputEl.addEventListener("input", () => {
+    const query = inputEl.value.trim();
     clearTimeout(debounceTimer);
 
     if (query.length < 2) {
@@ -87,7 +91,7 @@ if (tickerInput) {
     }, 250);
   });
 
-  tickerInput.addEventListener("keydown", (event) => {
+  inputEl.addEventListener("keydown", (event) => {
     if (suggestionsList.hidden || currentResults.length === 0) return;
 
     if (event.key === "ArrowDown") {
@@ -100,15 +104,20 @@ if (tickerInput) {
       highlight(activeIndex);
     } else if (event.key === "Enter" && activeIndex >= 0) {
       event.preventDefault();
-      tickerInput.value = currentResults[activeIndex].symbol;
+      selectSymbol(currentResults[activeIndex].symbol);
       closeSuggestions();
     } else if (event.key === "Escape") {
       closeSuggestions();
     }
   });
 
-  tickerInput.addEventListener("blur", closeSuggestions);
+  inputEl.addEventListener("blur", closeSuggestions);
 }
+
+attachTickerAutocomplete(
+  document.getElementById("ticker-input"),
+  document.getElementById("ticker-suggestions")
+);
 
 const friendSearch = document.getElementById("friend-search");
 if (friendSearch) {
@@ -168,6 +177,14 @@ if (friendSearch) {
 
   if (stockFilterInput) {
     stockFilterInput.addEventListener("input", applyFilters);
+    attachTickerAutocomplete(
+      stockFilterInput,
+      document.getElementById("stock-filter-suggestions"),
+      (symbol) => {
+        stockFilterInput.value = symbol;
+        applyFilters();
+      }
+    );
   }
 }
 

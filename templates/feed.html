@@ -41,13 +41,16 @@
             <button type="button" class="stock-chip" data-ticker="{{ ticker }}">{{ ticker }}</button>
           {% endfor %}
         </div>
-        <input
-          type="text"
-          id="stock-filter-input"
-          class="sidebar-search"
-          placeholder="Or search another ticker..."
-          autocomplete="off"
-        >
+        <div class="ticker-autocomplete">
+          <input
+            type="text"
+            id="stock-filter-input"
+            class="sidebar-search"
+            placeholder="Or search ticker/company name..."
+            autocomplete="off"
+          >
+          <ul class="ticker-suggestions" id="stock-filter-suggestions" hidden></ul>
+        </div>
       </div>
 
       {% if users %}
