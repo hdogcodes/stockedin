@@ -1,15 +1,54 @@
 {% extends "base.html" %}
 {% block title %}Feed — Portfolio Social{% endblock %}
+{% block container_class %}container-wide{% endblock %}
 {% block content %}
-  <h1>Your feed</h1>
-  {% if portfolios %}
-    {% for portfolio in portfolios %}
-      {% include "_post_card.html" %}
-    {% endfor %}
-  {% else %}
-    <p class="empty-state">
-      You're not following anyone yet.
-      <a href="{{ url_for('explore') }}">Find people to follow</a>.
-    </p>
-  {% endif %}
+  <div class="feed-layout">
+    <div class="feed-main">
+      <h1>Your feed</h1>
+      {% if portfolios %}
+        {% for portfolio in portfolios %}
+          {% include "_post_card.html" %}
+        {% endfor %}
+      {% else %}
+        <p class="empty-state">
+          You're not following anyone yet. Search for people to follow &rarr;
+        </p>
+      {% endif %}
+    </div>
+
+    <aside class="feed-sidebar">
+      <h2 class="sidebar-title">Find friends</h2>
+      <input
+        type="text"
+        id="friend-search"
+        class="sidebar-search"
+        placeholder="Search by username..."
+        autocomplete="off"
+      >
+      {% if users %}
+        <ul class="user-list sidebar-user-list" id="friend-list">
+          {% for user in users %}
+            <li class="user-row" data-username="{{ user.username|lower }}">
+              <a class="user-link" href="{{ url_for('profile', username=user.username) }}">
+                <strong>{{ user.username }}</strong>
+                {% if user.bio %}<span class="user-bio">{{ user.bio }}</span>{% endif %}
+              </a>
+              {% if current_user.is_following(user) %}
+                <form method="post" action="{{ url_for('unfollow', username=user.username) }}">
+                  <button type="submit" class="btn btn-small btn-outline">Unfollow</button>
+                </form>
+              {% else %}
+                <form method="post" action="{{ url_for('follow', username=user.username) }}">
+                  <button type="submit" class="btn btn-small btn-primary">Follow</button>
+                </form>
+              {% endif %}
+            </li>
+          {% endfor %}
+        </ul>
+        <p class="empty-state sidebar-no-results" id="friend-search-empty" hidden>No matching users.</p>
+      {% else %}
+        <p class="empty-state">No other users yet.</p>
+      {% endif %}
+    </aside>
+  </div>
 {% endblock %}

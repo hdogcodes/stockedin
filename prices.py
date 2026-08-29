@@ -32,13 +32,19 @@ load_dotenv()
 
 FINNHUB_API_KEY = os.environ.get("FINNHUB_API_KEY", "")
 FINNHUB_QUOTE_URL = "https://finnhub.io/api/v1/quote"
+FINNHUB_SEARCH_URL = "https://finnhub.io/api/v1/search"
 
 # ticker -> (quote_dict_or_None, fetched_at_epoch)
 _cache = {}
 
+# lowercased query -> (results_list, fetched_at_epoch)
+_search_cache = {}
+
 CACHE_TTL_SECONDS = 300
 FAILURE_CACHE_TTL_SECONDS = 60
+SEARCH_CACHE_TTL_SECONDS = 300
 REQUEST_TIMEOUT_SECONDS = 4
+SEARCH_RESULT_LIMIT = 8
 
 
 def _clean(value):
@@ -147,6 +153,55 @@ def prefetch_quotes(tickers):
         results = pool.map(_fetch, stale)
         for ticker, quote in zip(stale, results):
             _cache[ticker] = (quote, time.time(), quote is not None)
+
+
+def search_symbols(query):
+    """Look up tickers by symbol OR company name, e.g. "amazon" -> AMZN.
+
+    Powers the autocomplete on the add-holding form. Never raises — a bad
+    query or unreachable API just yields an empty list, so the dropdown
+    silently has no suggestions instead of erroring the page.
+    """
+    query = (query or "").strip()
+    if not query or not FINNHUB_API_KEY:
+        return []
+
+    key = query.lower()
+    cached = _search_cache.get(key)
+    if cached is not None:
+        results, fetched_at = cached
+        if time.time() - fetched_at < SEARCH_CACHE_TTL_SECONDS:
+            return results
+
+    try:
+        response = requests.get(
+            FINNHUB_SEARCH_URL,
+            params={"q": query, "token": FINNHUB_API_KEY},
+            timeout=REQUEST_TIMEOUT_SECONDS,
+        )
+        response.raise_for_status()
+        data = response.json()
+    except Exception:
+        return _search_cache.get(key, ([], 0))[0]
+
+    results = []
+    seen = set()
+    for item in data.get("result", []):
+        symbol = item.get("symbol")
+        description = item.get("description")
+        if not symbol or not description or symbol in seen:
+            continue
+        # Skip non-tradeable derivatives (warrants, index entries, etc.) so
+        # the dropdown stays focused on things you can actually hold shares of.
+        if item.get("type") not in ("Common Stock", ""):
+            continue
+        seen.add(symbol)
+        results.append({"symbol": symbol, "description": description})
+        if len(results) >= SEARCH_RESULT_LIMIT:
+            break
+
+    _search_cache[key] = (results, time.time())
+    return results
 
 
 def ticker_exists(ticker):

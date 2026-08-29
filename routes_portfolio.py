@@ -1,11 +1,12 @@
 """Create/edit portfolio and add/remove holding views. Owner-only mutations."""
 
-from flask import abort, flash, redirect, render_template, url_for
+from flask import abort, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from extensions import db
 from forms import HoldingForm, PortfolioForm
 from models import Holding, Portfolio
+from prices import search_symbols
 
 
 @login_required
@@ -68,6 +69,12 @@ def holding_new():
 
 
 @login_required
+def ticker_search():
+    query = request.args.get("q", "")
+    return jsonify(search_symbols(query))
+
+
+@login_required
 def holding_delete(holding_id):
     holding = db.session.get(Holding, holding_id)
     if holding is None:
@@ -90,6 +97,7 @@ def register(app):
     app.add_url_rule(
         "/portfolio/holdings/new", view_func=holding_new, methods=["GET", "POST"]
     )
+    app.add_url_rule("/api/ticker-search", view_func=ticker_search)
     app.add_url_rule(
         "/holding/<int:holding_id>/delete", view_func=holding_delete, methods=["POST"]
     )

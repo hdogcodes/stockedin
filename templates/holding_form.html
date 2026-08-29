@@ -7,7 +7,10 @@
 
     <div class="field">
       {{ form.ticker.label }}
-      {{ form.ticker(size=12, placeholder="e.g. AAPL") }}
+      <div class="ticker-autocomplete">
+        {{ form.ticker(size=12, placeholder="Ticker or company name, e.g. Amazon", autocomplete="off", id="ticker-input") }}
+        <ul class="ticker-suggestions" id="ticker-suggestions" hidden></ul>
+      </div>
       {% for error in form.ticker.errors %}<p class="error">{{ error }}</p>{% endfor %}
     </div>
 

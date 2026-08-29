@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}News — Portfolio Social{% endblock %}
+{% block content %}
+  <h1>Finance news</h1>
+  {% if articles %}
+    <div class="news-grid">
+      {% for article in articles %}
+        <a class="news-card" href="{{ article.url }}" target="_blank" rel="noopener noreferrer">
+          <img class="news-image" src="{{ article.image }}" alt="" loading="lazy">
+          <div class="news-body">
+            <span class="news-source">{{ article.source }}{% if article.published %} &middot; {{ article.published }}{% endif %}</span>
+            <h3 class="news-headline">{{ article.headline }}</h3>
+            {% if article.summary %}<p class="news-summary">{{ article.summary }}</p>{% endif %}
+          </div>
+        </a>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="empty-state">No news available right now.</p>
+  {% endif %}
+{% endblock %}

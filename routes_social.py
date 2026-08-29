@@ -1,4 +1,4 @@
-"""Feed, explore, profile, follow/unfollow, and AJAX like/comment views."""
+"""Feed, profile, follow/unfollow, and AJAX like/comment views."""
 
 from flask import abort, flash, jsonify, redirect, render_template, url_for
 from flask_login import current_user, login_required
@@ -21,19 +21,14 @@ def feed():
     )
     attach_stats(portfolios)
     comment_form = CommentForm()
-    return render_template(
-        "feed.html", portfolios=portfolios, comment_form=comment_form
-    )
-
-
-@login_required
-def explore():
     users = (
         User.query.filter(User.id != current_user.id)
         .order_by(User.username)
         .all()
     )
-    return render_template("explore.html", users=users)
+    return render_template(
+        "feed.html", portfolios=portfolios, comment_form=comment_form, users=users
+    )
 
 
 @login_required
@@ -121,7 +116,6 @@ def comment_portfolio(portfolio_id):
 
 def register(app):
     app.add_url_rule("/", view_func=feed)
-    app.add_url_rule("/explore", view_func=explore)
     app.add_url_rule("/user/<username>", view_func=profile)
     app.add_url_rule("/follow/<username>", view_func=follow, methods=["POST"])
     app.add_url_rule("/unfollow/<username>", view_func=unfollow, methods=["POST"])

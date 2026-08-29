@@ -8,6 +8,127 @@ function getCsrfToken(form) {
   return input ? input.value : null;
 }
 
+const tickerInput = document.getElementById("ticker-input");
+if (tickerInput) {
+  const suggestionsList = document.getElementById("ticker-suggestions");
+  let debounceTimer = null;
+  let activeIndex = -1;
+  let currentResults = [];
+  let requestId = 0;
+
+  function closeSuggestions() {
+    suggestionsList.hidden = true;
+    suggestionsList.innerHTML = "";
+    currentResults = [];
+    activeIndex = -1;
+  }
+
+  function renderSuggestions(results) {
+    currentResults = results;
+    activeIndex = -1;
+    suggestionsList.innerHTML = "";
+
+    if (results.length === 0) {
+      closeSuggestions();
+      return;
+    }
+
+    results.forEach((item) => {
+      const li = document.createElement("li");
+      li.className = "ticker-suggestion";
+      li.setAttribute("role", "option");
+      const symbol = document.createElement("span");
+      symbol.className = "ticker-suggestion-symbol";
+      symbol.textContent = item.symbol;
+      const desc = document.createElement("span");
+      desc.className = "ticker-suggestion-desc";
+      desc.textContent = item.description;
+      li.append(symbol, desc);
+      li.addEventListener("mousedown", (event) => {
+        // mousedown (not click) fires before the input's blur handler closes the list.
+        event.preventDefault();
+        tickerInput.value = item.symbol;
+        closeSuggestions();
+      });
+      suggestionsList.appendChild(li);
+    });
+
+    suggestionsList.hidden = false;
+  }
+
+  function highlight(index) {
+    const items = suggestionsList.querySelectorAll(".ticker-suggestion");
+    items.forEach((el, i) => el.classList.toggle("active", i === index));
+    if (index >= 0 && items[index]) {
+      items[index].scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  tickerInput.addEventListener("input", () => {
+    const query = tickerInput.value.trim();
+    clearTimeout(debounceTimer);
+
+    if (query.length < 2) {
+      closeSuggestions();
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      const thisRequest = ++requestId;
+      try {
+        const response = await fetch(`/api/ticker-search?q=${encodeURIComponent(query)}`);
+        if (!response.ok) throw new Error("ticker search failed");
+        const results = await response.json();
+        if (thisRequest !== requestId) return; // a newer keystroke superseded this request
+        renderSuggestions(results);
+      } catch (err) {
+        console.error(err);
+      }
+    }, 250);
+  });
+
+  tickerInput.addEventListener("keydown", (event) => {
+    if (suggestionsList.hidden || currentResults.length === 0) return;
+
+    if (event.key === "ArrowDown") {
+      event.preventDefault();
+      activeIndex = Math.min(activeIndex + 1, currentResults.length - 1);
+      highlight(activeIndex);
+    } else if (event.key === "ArrowUp") {
+      event.preventDefault();
+      activeIndex = Math.max(activeIndex - 1, 0);
+      highlight(activeIndex);
+    } else if (event.key === "Enter" && activeIndex >= 0) {
+      event.preventDefault();
+      tickerInput.value = currentResults[activeIndex].symbol;
+      closeSuggestions();
+    } else if (event.key === "Escape") {
+      closeSuggestions();
+    }
+  });
+
+  tickerInput.addEventListener("blur", closeSuggestions);
+}
+
+const friendSearch = document.getElementById("friend-search");
+if (friendSearch) {
+  const rows = Array.from(document.querySelectorAll("#friend-list .user-row"));
+  const emptyState = document.getElementById("friend-search-empty");
+
+  friendSearch.addEventListener("input", () => {
+    const query = friendSearch.value.trim().toLowerCase();
+    let visibleCount = 0;
+
+    rows.forEach((row) => {
+      const matches = row.dataset.username.includes(query);
+      row.hidden = !matches;
+      if (matches) visibleCount += 1;
+    });
+
+    if (emptyState) emptyState.hidden = visibleCount !== 0;
+  });
+}
+
 document.addEventListener("click", async (event) => {
   const btn = event.target.closest(".like-btn");
   if (!btn) return;

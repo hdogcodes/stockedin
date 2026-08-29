@@ -11,59 +11,39 @@
   {% if portfolio.description %}<p class="post-description">{{ portfolio.description }}</p>{% endif %}
 
   {% if portfolio.stats.rows %}
-    <table class="holdings-table">
-      <thead>
-        <tr>
-          <th>Ticker</th>
-          <th>Shares</th>
-          <th>Buy price</th>
-          <th>Price</th>
-          <th>Value</th>
-          <th>Gain/Loss</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in portfolio.stats.rows %}
-          <tr>
-            <td>{{ row.holding.ticker }}</td>
-            <td>{{ row.holding.shares }}</td>
-            <td>${{ "%.2f"|format(row.holding.buy_price) }}</td>
-            {% if row.available %}
-              <td>${{ "%.2f"|format(row.current_price) }}</td>
-              <td>${{ "%.2f"|format(row.current_value) }}</td>
-              <td class="{{ 'gain' if row.gain_loss >= 0 else 'loss' }}">
-                {{ "+" if row.gain_loss >= 0 else "" }}${{ "%.2f"|format(row.gain_loss) }}
-                ({{ "%.1f"|format(row.gain_loss_pct) }}%)
-              </td>
-            {% else %}
-              <td colspan="3" class="unavailable">price unavailable</td>
-            {% endif %}
-            {% if portfolio.owner.id == current_user.id %}
-              <td>
-                <form method="post" action="{{ url_for('holding_delete', holding_id=row.holding.id) }}"
-                      onsubmit="return confirm('Remove {{ row.holding.ticker }}?');">
-                  <button type="submit" class="btn-link">remove</button>
-                </form>
-              </td>
-            {% endif %}
-          </tr>
-        {% endfor %}
-      </tbody>
-      {% if portfolio.stats.total_gain_loss_pct is not none %}
-        <tfoot>
-          <tr>
-            <td colspan="4"><strong>Total</strong></td>
-            <td><strong>${{ "%.2f"|format(portfolio.stats.total_value) }}</strong></td>
-            <td class="{{ 'gain' if portfolio.stats.total_gain_loss >= 0 else 'loss' }}">
-              <strong>
-                {{ "+" if portfolio.stats.total_gain_loss >= 0 else "" }}${{ "%.2f"|format(portfolio.stats.total_gain_loss) }}
-                ({{ "%.1f"|format(portfolio.stats.total_gain_loss_pct) }}%)
-              </strong>
-            </td>
-          </tr>
-        </tfoot>
-      {% endif %}
-    </table>
+    {% if portfolio.stats.total_gain_loss_pct is not none %}
+      <div class="summary-total {{ 'gain' if portfolio.stats.total_gain_loss >= 0 else 'loss' }}">
+        <div class="summary-figure">
+          {{ "+" if portfolio.stats.total_gain_loss >= 0 else "" }}${{ "%.2f"|format(portfolio.stats.total_gain_loss) }}
+          <span class="summary-pct">({{ "%.1f"|format(portfolio.stats.total_gain_loss_pct) }}%)</span>
+        </div>
+        <div class="summary-label">Total gain/loss &middot; ${{ "%.2f"|format(portfolio.stats.total_value) }} value</div>
+      </div>
+    {% endif %}
+
+    <ul class="holdings-list">
+      {% for row in portfolio.stats.rows %}
+        <li class="holding-row">
+          <span class="holding-ticker">{{ row.holding.ticker }}</span>
+          <span class="holding-detail">{{ row.holding.shares }} sh @ ${{ "%.2f"|format(row.holding.buy_price) }}</span>
+          {% if row.available %}
+            <span class="holding-price">${{ "%.2f"|format(row.current_price) }}</span>
+            <span class="holding-gain {{ 'gain' if row.gain_loss >= 0 else 'loss' }}">
+              {{ "+" if row.gain_loss >= 0 else "" }}${{ "%.2f"|format(row.gain_loss) }}
+              ({{ "%.1f"|format(row.gain_loss_pct) }}%)
+            </span>
+          {% else %}
+            <span class="unavailable">price unavailable</span>
+          {% endif %}
+          {% if portfolio.owner.id == current_user.id %}
+            <form method="post" action="{{ url_for('holding_delete', holding_id=row.holding.id) }}"
+                  onsubmit="return confirm('Remove {{ row.holding.ticker }}?');">
+              <button type="submit" class="btn-link">remove</button>
+            </form>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
   {% else %}
     <p class="empty-holdings">No holdings yet.</p>
   {% endif %}

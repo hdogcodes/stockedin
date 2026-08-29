@@ -3,6 +3,7 @@
 from flask import Flask
 
 import routes_auth
+import routes_news
 import routes_portfolio
 import routes_social
 from config import Config
@@ -19,6 +20,7 @@ def create_app():
     routes_auth.register(app)
     routes_portfolio.register(app)
     routes_social.register(app)
+    routes_news.register(app)
 
     return app
 
