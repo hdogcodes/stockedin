@@ -17,7 +17,7 @@
           <div class="explore-card-header">
             <span class="avatar avatar-sm">{{ p.owner.username[0]|upper }}</span>
             <div>
-              <strong>{{ p.owner.username }}</strong>
+              <strong>{{ p.owner.username|capitalize }}</strong>
               {% if p.owner.university %}<span class="explore-card-uni">{{ p.owner.university }}</span>{% endif %}
             </div>
             {% if p.stats.total_gain_loss_pct is not none %}

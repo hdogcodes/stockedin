@@ -20,8 +20,7 @@ def _thread_query(user_a_id, user_b_id):
     )
 
 
-@login_required
-def inbox():
+def _build_threads():
     friends = current_user.mutual_friends
     threads = []
     for friend in friends:
@@ -43,8 +42,12 @@ def inbox():
         key=lambda t: t["last_message"].created_at if t["last_message"] else datetime.min,
         reverse=True,
     )
+    return threads
 
-    return render_template("messages_inbox.html", threads=threads)
+
+@login_required
+def inbox():
+    return render_template("messages_inbox.html", threads=_build_threads(), active_username=None)
 
 
 @login_required
@@ -69,7 +72,12 @@ def thread(username):
     messages = _thread_query(current_user.id, target.id).order_by(Message.created_at).all()
 
     return render_template(
-        "messages_thread.html", target=target, messages=messages, form=form
+        "messages_thread.html",
+        target=target,
+        messages=messages,
+        form=form,
+        threads=_build_threads(),
+        active_username=target.username,
     )
 
 

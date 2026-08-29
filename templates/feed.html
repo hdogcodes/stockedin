@@ -77,7 +77,7 @@
               <a class="user-link" href="{{ url_for('profile', username=user.username) }}">
                 <span class="avatar avatar-sm">{{ user.username[0]|upper }}</span>
                 <span class="user-link-text">
-                  <strong>{{ user.username }}</strong>
+                  <strong>{{ user.username|capitalize }}</strong>
                   {% if user.bio %}<span class="user-bio">{{ user.bio }}</span>{% endif %}
                   {% if user.held_tickers %}
                     <span class="user-holdings">{{ user.held_tickers|join(', ') }}</span>

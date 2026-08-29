@@ -19,7 +19,7 @@
             {% for p in leaderboard %}
               <li>
                 <span class="lb-rank">{{ loop.index }}</span>
-                <a class="lb-name" href="{{ url_for('profile', username=p.owner.username) }}">{{ p.owner.username }}</a>
+                <a class="lb-name" href="{{ url_for('profile', username=p.owner.username) }}">{{ p.owner.username|capitalize }}</a>
                 <span class="lb-value {{ 'gain' if p.stats.total_gain_loss_pct >= 0 else 'loss' }}">
                   {{ "+" if p.stats.total_gain_loss_pct >= 0 else "" }}{{ "%.1f"|format(p.stats.total_gain_loss_pct) }}%
                 </span>
@@ -36,7 +36,7 @@
         <div class="group-messages">
           {% for m in group.messages %}
             <div class="message-bubble theirs group-message">
-              <strong>{{ m.user.username }}</strong>
+              <strong>{{ m.user.username|capitalize }}</strong>
               <p>{{ m.body }}</p>
               <span class="message-time">{{ m.created_at.strftime('%b %d, %H:%M') }}</span>
             </div>
@@ -60,7 +60,7 @@
             <a class="user-link" href="{{ url_for('profile', username=member.username) }}">
               <span class="avatar avatar-sm">{{ member.username[0]|upper }}</span>
               <span class="user-link-text">
-                <strong>{{ member.username }}</strong>
+                <strong>{{ member.username|capitalize }}</strong>
                 {% if member.id == group.owner_id %}<span class="user-bio">Owner</span>{% endif %}
               </span>
             </a>

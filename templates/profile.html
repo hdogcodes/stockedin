@@ -1,5 +1,6 @@
 {% extends "base.html" %}
-{% block title %}{{ profile_user.username }} — Stockedin{% endblock %}
+{% block title %}{{ profile_user.username|capitalize }} — Stockedin{% endblock %}
+{% block container_class %}container-full{% endblock %}
 {% block content %}
   {% include "_ticker_tape.html" %}
   <header class="profile-header">
@@ -15,7 +16,7 @@
 
     <div class="profile-body">
       <div class="profile-identity-text">
-        <h1>{{ profile_user.username }}</h1>
+        <h1>{{ profile_user.username|capitalize }}</h1>
         {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
         {% if profile_user.university %}
           <p class="profile-university">
@@ -121,7 +122,7 @@
         {% if profile_user.id == current_user.id %}
           You haven't created a portfolio yet.
         {% else %}
-          {{ profile_user.username }} hasn't created a portfolio yet.
+          {{ profile_user.username|capitalize }} hasn't created a portfolio yet.
         {% endif %}
       </p>
     </div>

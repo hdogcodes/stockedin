@@ -11,7 +11,7 @@
           <a class="user-link" href="{{ url_for('profile', username=u.username) }}">
             <span class="avatar avatar-sm">{{ u.username[0]|upper }}</span>
             <span class="user-link-text">
-              <strong>{{ u.username }}</strong>
+              <strong>{{ u.username|capitalize }}</strong>
               <span class="user-bio">{{ u.degree }}{% if u.degree and u.grad_year %} &middot; {% endif %}{% if u.grad_year %}Class of {{ u.grad_year }}{% endif %}</span>
             </span>
           </a>
@@ -43,7 +43,7 @@
           <a class="user-link" href="{{ url_for('profile', username=u.username) }}">
             <span class="avatar avatar-sm">{{ u.username[0]|upper }}</span>
             <span class="user-link-text">
-              <strong>{{ u.username }}</strong>
+              <strong>{{ u.username|capitalize }}</strong>
               <span class="user-bio">{{ u.university }}{% if u.grad_year %} &middot; Class of {{ u.grad_year }}{% endif %}</span>
             </span>
           </a>

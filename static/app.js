@@ -332,8 +332,9 @@ document.addEventListener("submit", async (event) => {
     const list = form.closest(".comments").querySelector(".comment-list");
     const li = document.createElement("li");
     li.className = "comment";
+    const displayName = data.username.charAt(0).toUpperCase() + data.username.slice(1);
     li.innerHTML = `
-      <a href="/user/${data.username}">${data.username}</a>
+      <a href="/user/${data.username}">${displayName}</a>
       <span class="comment-body"></span>
       <span class="comment-date">${data.created_at}</span>
     `;

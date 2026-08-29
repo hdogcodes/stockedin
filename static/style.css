@@ -99,16 +99,26 @@ body {
   transition: background-color 0.15s, color 0.15s;
 }
 
+/* Vertical sidebar nav, permanently fixed to the left edge. `body`'s
+   padding-left reserves the matching gutter so page content never sits
+   underneath it. */
+body { padding-left: 220px; }
+
 .navbar {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.7rem 1.5rem;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 220px;
+  padding: 1.2rem 1rem;
   background: var(--nav-bg);
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border);
-  position: sticky;
-  top: 0;
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
   z-index: 100;
 }
 
@@ -122,6 +132,7 @@ body {
   color: var(--text);
   text-decoration: none;
   letter-spacing: -0.01em;
+  margin-bottom: 1.2rem;
 }
 .brand-mark {
   width: 30px;
@@ -130,22 +141,22 @@ body {
   flex-shrink: 0;
 }
 
-.nav-links { display: flex; align-items: center; gap: 0.15rem; }
+.nav-links { display: flex; flex-direction: column; align-items: stretch; gap: 0.3rem; }
 .nav-link {
   position: relative;
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.45rem 0.7rem;
-  margin-left: 0.15rem;
+  justify-content: flex-start;
+  gap: 0.4rem;
+  padding: 0.55rem 0.9rem;
   border-radius: 0;
   color: var(--muted);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.88rem;
   font-weight: 600;
   transition: background 0.15s, color 0.15s;
 }
-.nav-link svg { width: 18px; height: 18px; flex-shrink: 0; }
+.nav-link svg { width: 19px; height: 19px; flex-shrink: 0; }
 .nav-link:hover { background: var(--bg); color: var(--text); }
 .nav-link.active { color: var(--text); background: var(--bg); }
 .nav-link span:not(.avatar):not(.nav-badge) { display: inline; }
@@ -161,18 +172,13 @@ body {
   text-align: center;
 }
 
-@media (max-width: 720px) {
-  .nav-link span:not(.avatar):not(.nav-badge) { display: none; }
-  .nav-link { padding: 0.5rem; }
-}
-
 .theme-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
   width: 34px;
   height: 34px;
-  margin-left: 0.4rem;
+  margin: 0.6rem 0 0;
   border: 1px solid var(--border);
   border-radius: 50%;
   background: none;
@@ -184,6 +190,29 @@ body {
 .theme-toggle .icon-moon { display: none; }
 html[data-theme="dark"] .theme-toggle .icon-sun { display: none; }
 html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
+
+/* Below 720px the sidebar collapses back into a compact top bar — a fixed
+   220px-wide rail has no room to live on a phone-sized viewport. */
+@media (max-width: 720px) {
+  body { padding-left: 0; }
+  .navbar {
+    position: sticky;
+    top: 0;
+    left: auto;
+    bottom: auto;
+    width: auto;
+    flex-direction: row;
+    align-items: center;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 0.6rem 1rem;
+  }
+  .navbar .brand { margin-bottom: 0; }
+  .nav-links { flex-direction: row; align-items: center; }
+  .nav-link { padding: 0.5rem; }
+  .nav-link span:not(.avatar):not(.nav-badge) { display: none; }
+  .theme-toggle { margin: 0 0 0 0.4rem; }
+}
 
 .container {
   max-width: 640px;
@@ -458,6 +487,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .user-bio { color: var(--muted); font-size: 0.8rem; }
 
 .container-wide { max-width: 1440px; }
+.container-full { max-width: none; }
 
 /* Three columns: leaderboard | feed | friend search — spread across the
    full page instead of a narrow centered column with dead space either side. */
@@ -469,7 +499,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 }
 .feed-main { min-width: 0; }
 
-.feed-leaderboard-col { position: sticky; top: 4.5rem; }
+.feed-leaderboard-col { position: sticky; top: 1.5rem; }
 .feed-leaderboard-col .leaderboard-card { margin-bottom: 0; }
 
 .feed-sidebar {
@@ -478,7 +508,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   border-radius: var(--radius);
   padding: 1.2rem 1rem 1rem;
   position: sticky;
-  top: 4.5rem;
+  top: 1.5rem;
   box-shadow: var(--shadow);
   overflow: hidden;
 }
@@ -687,6 +717,54 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   padding-bottom: 0.4rem;
 }
 
+/* Two-pane layout: friend/thread list on the left, active conversation
+   (or an empty-state placeholder) on the right. Both messages_inbox.html
+   and messages_thread.html share this shell so switching between "no
+   thread selected" and "viewing a thread" never reflows the sidebar. */
+.messages-layout {
+  display: grid;
+  grid-template-columns: 380px minmax(0, 1fr);
+  gap: 1.2rem;
+  /* Default grid behavior (no align-items override) stretches both columns
+     to the row's height, so the sidebar always matches the chat panel's
+     height instead of shrink-wrapping to its own (usually shorter) list. */
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.messages-sidebar {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1rem;
+  position: sticky;
+  top: 1.5rem;
+  overflow-y: auto;
+}
+.messages-sidebar-title { margin: 0 0 0.8rem; font-size: 1.05rem; }
+
+.messages-panel {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 1.3rem;
+  min-height: calc(100vh - 6rem);
+  display: flex;
+  flex-direction: column;
+}
+.messages-panel-empty {
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 860px) {
+  .messages-layout { grid-template-columns: 1fr; }
+  .messages-sidebar { position: static; height: auto; }
+  .messages-panel-empty { display: none; }
+}
+
 .thread-list { list-style: none; padding: 0; margin: 0; }
 .thread-row {
   display: flex;
@@ -699,6 +777,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   transition: background 0.15s;
 }
 .thread-row:hover { background: var(--bg); }
+.thread-row.active { background: var(--bg); box-shadow: inset 3px 0 0 var(--primary); }
 .thread-row.unread .thread-info strong { font-weight: 800; }
 .thread-info { display: flex; flex-direction: column; min-width: 0; flex: 1; }
 .thread-preview {
@@ -734,10 +813,12 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 }
 
 .message-list {
+  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
   margin-bottom: 1rem;
+  overflow-y: auto;
 }
 .message-bubble {
   max-width: 70%;
@@ -756,13 +837,11 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   align-self: flex-start;
   background: var(--bg);
   color: var(--text);
-  border-bottom-left-radius: 4px;
 }
 .message-bubble.mine {
   align-self: flex-end;
   background: var(--primary);
   color: #fff;
-  border-bottom-right-radius: 4px;
 }
 .message-bubble.mine .message-time { color: rgba(255, 255, 255, 0.8); }
 
@@ -791,8 +870,12 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 }
 .ticker-tape-track {
   display: flex;
-  gap: 2rem;
-  padding: 0 1.2rem;
+  /* "safe center" keeps the row centered when it fits within the card, but
+     falls back to left-aligned (instead of clipping the start) if the
+     viewport is ever too narrow to fit every quote on one line. */
+  justify-content: safe center;
+  gap: 1.1rem;
+  padding: 0 0.9rem;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -800,10 +883,10 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .ticker-tape-item {
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
+  gap: 0.35rem;
   flex-shrink: 0;
   font-family: var(--font-numeric);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-variant-numeric: tabular-nums;
   color: var(--muted);
   white-space: nowrap;

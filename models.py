@@ -141,7 +141,7 @@ class Portfolio(db.Model):
     risk_level = db.Column(db.String(20))
     goal = db.Column(db.String(40))
     thesis = db.Column(db.Text)
-    # Comma-separated tag strings (e.g. "🚀 Growth,🤖 AI") rather than a
+    # Comma-separated tag strings (e.g. "Growth,AI") rather than a
     # separate join table — the tag set is small and fixed, so filtering in
     # Python is simple and plenty fast at this app's scale.
     tags = db.Column(db.String(200))

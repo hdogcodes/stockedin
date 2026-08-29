@@ -26,18 +26,18 @@ def compute_personality(portfolio):
     tags = []
 
     if n <= 3:
-        tags.append("🎯 Concentrated")
+        tags.append("Concentrated")
 
     tech_share = sum(1 for t in tickers if t in TECH_TICKERS) / n
     if tech_share >= 0.5:
-        tags.append("💻 Tech Heavy")
+        tags.append("Tech Heavy")
 
     us_share = sum(1 for t in tickers if "." not in t) / n
     if us_share == 1:
-        tags.append("🇺🇸 US Focused")
+        tags.append("US Focused")
 
     growth_share = sum(1 for t in tickers if t in GROWTH_TICKERS) / n
     if growth_share >= 0.4:
-        tags.append("🚀 Aggressive Growth")
+        tags.append("Aggressive Growth")
 
     return tags[:3]

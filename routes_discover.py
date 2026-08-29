@@ -8,21 +8,21 @@ from models import Portfolio, User
 from prices import attach_stats
 
 EXPLORE_TABS = [
-    ("trending", "🔥 Trending"),
-    ("top", "🏆 Top Performing"),
-    ("students", "🎓 Student Investors"),
-    ("growth", "🚀 Growth"),
-    ("dividend", "💰 Dividend"),
-    ("ai", "🤖 AI"),
-    ("low-risk", "🛡️ Low Risk"),
-    ("new", "🆕 New Portfolios"),
+    ("trending", "Trending"),
+    ("top", "Top Performing"),
+    ("students", "Student Investors"),
+    ("growth", "Growth"),
+    ("dividend", "Dividend"),
+    ("ai", "AI"),
+    ("low-risk", "Low Risk"),
+    ("new", "New Portfolios"),
 ]
 
 TAB_TAGS = {
-    "growth": "🚀 Growth",
-    "dividend": "💰 Dividend",
-    "ai": "🤖 AI",
-    "low-risk": "🛡️ Low Risk",
+    "growth": "Growth",
+    "dividend": "Dividend",
+    "ai": "AI",
+    "low-risk": "Low Risk",
 }
 
 

@@ -37,7 +37,7 @@
     {% for row in leaderboards.portfolios %}
       <li>
         <span class="lb-rank">{{ loop.index }}</span>
-        <a class="lb-name" href="{{ url_for('profile', username=row.username) }}">{{ row.username }}</a>
+        <a class="lb-name" href="{{ url_for('profile', username=row.username) }}">{{ row.username|capitalize }}</a>
         <span class="lb-value {{ 'gain' if row.gain_loss_pct >= 0 else 'loss' }}">
           {{ "+" if row.gain_loss_pct >= 0 else "" }}{{ "%.1f"|format(row.gain_loss_pct) }}%
         </span>

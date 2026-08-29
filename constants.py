@@ -5,23 +5,23 @@ same canonical strings instead of drifting.
 """
 
 PORTFOLIO_TAGS = [
-    "🚀 Growth",
-    "💰 Dividend",
-    "🤖 AI",
-    "💻 Technology",
-    "🌱 Sustainable",
-    "🛡️ Low Risk",
-    "🌎 Global",
-    "🎓 Student",
+    "Growth",
+    "Dividend",
+    "AI",
+    "Technology",
+    "Sustainable",
+    "Low Risk",
+    "Global",
+    "Student",
 ]
 
 PORTFOLIO_GOALS = [
-    "🏠 First Home",
-    "🎓 Education",
-    "💰 Long-Term Wealth",
-    "💵 Passive Income",
-    "🚀 High Growth",
-    "🛡️ Preserve Capital",
+    "First Home",
+    "Education",
+    "Long-Term Wealth",
+    "Passive Income",
+    "High Growth",
+    "Preserve Capital",
 ]
 
 RISK_LEVELS = ["Low", "Medium", "High"]
