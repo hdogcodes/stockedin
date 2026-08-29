@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}Portfolio Social{% endblock %}</title>
+  <title>{% block title %}Stalkin'{% endblock %}</title>
   <script>
     // Applied before the stylesheet paints anything, so there's no flash
     // of the wrong theme on load.
@@ -13,12 +13,23 @@
       document.documentElement.dataset.theme = theme;
     })();
   </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
   <nav class="navbar">
     <a class="brand" href="{{ url_for('feed') if current_user.is_authenticated else url_for('login') }}">
-      <span class="brand-mark">P</span>Portfolio Social
+      {# An eye (stalk/watch) with an upward stock trend line as the pupil — "stalk" + "stock". #}
+      <span class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1.5 12S5.5 5.5 12 5.5 22.5 12 22.5 12 18.5 18.5 12 18.5 1.5 12 1.5 12Z"/>
+          <path d="M7.5 13.5l2.8-3.2 2.2 2 4-4.3"/>
+          <path d="M13.2 7.5h3.3v3.4"/>
+        </svg>
+      </span>
+      Stalkin'
     </a>
     <div class="nav-links">
       {% if current_user.is_authenticated %}

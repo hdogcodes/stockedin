@@ -1,4 +1,4 @@
-# Portfolio Social
+# Stalkin'
 
 A small social network where posts are stock portfolios instead of photos.
 Sign up, add your holdings, follow other people, and like/comment on their

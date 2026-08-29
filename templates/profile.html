@@ -1,21 +1,27 @@
 {% extends "base.html" %}
-{% block title %}{{ profile_user.username }} — Portfolio Social{% endblock %}
+{% block title %}{{ profile_user.username }} — Stalkin'{% endblock %}
 {% block content %}
   {% include "_ticker_tape.html" %}
   <header class="profile-header">
     <div class="profile-cover" style="background-image: url('{{ cover_image }}')"></div>
+
+    {# Only the avatar overlaps the photo — it has its own opaque border so
+       it reads on any image. Name/bio/stats/actions stay fully within the
+       solid card background below, so they're never illegible over busy
+       parts of the photo. #}
+    <div class="profile-avatar-row">
+      <span class="avatar avatar-lg">{{ profile_user.username[0]|upper }}</span>
+    </div>
+
     <div class="profile-body">
-      <div class="profile-identity">
-        <span class="avatar avatar-lg">{{ profile_user.username[0]|upper }}</span>
-        <div class="profile-identity-text">
-          <h1>{{ profile_user.username }}</h1>
-          {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
-          <p class="profile-stats">
-            <strong>{{ profile_user.followers_count }}</strong> followers
-            &middot;
-            <strong>{{ profile_user.following_count }}</strong> following
-          </p>
-        </div>
+      <div class="profile-identity-text">
+        <h1>{{ profile_user.username }}</h1>
+        {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
+        <p class="profile-stats">
+          <strong>{{ profile_user.followers_count }}</strong> followers
+          &middot;
+          <strong>{{ profile_user.following_count }}</strong> following
+        </p>
       </div>
       <div class="profile-actions">
         {% if profile_user.id == current_user.id %}

@@ -8,6 +8,21 @@ function getCsrfToken(form) {
   return input ? input.value : null;
 }
 
+const leaderboardCard = document.querySelector(".leaderboard-card");
+if (leaderboardCard) {
+  const tabs = Array.from(leaderboardCard.querySelectorAll(".leaderboard-tab"));
+  const panels = Array.from(leaderboardCard.querySelectorAll(".leaderboard-list"));
+
+  tabs.forEach((tab) => {
+    tab.addEventListener("click", () => {
+      tabs.forEach((t) => t.classList.toggle("active", t === tab));
+      panels.forEach((panel) => {
+        panel.hidden = panel.dataset.panel !== tab.dataset.target;
+      });
+    });
+  });
+}
+
 const themeToggle = document.getElementById("theme-toggle");
 if (themeToggle) {
   themeToggle.addEventListener("click", () => {

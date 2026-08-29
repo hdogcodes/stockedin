@@ -11,13 +11,23 @@
   --loss: #f6465d;
   --loss-bg: #fdeaed;
   --danger: #f6465d;
-  --gradient: linear-gradient(135deg, #f9ce34 0%, #ee2a7b 55%, #6228d7 100%);
+  --gradient: linear-gradient(135deg, #fb923c 0%, #f97316 55%, #c2410c 100%);
   --shadow: 0 1px 2px rgba(15, 17, 21, 0.04), 0 8px 24px rgba(15, 17, 21, 0.06);
   --shadow-hover: 0 4px 8px rgba(15, 17, 21, 0.06), 0 16px 32px rgba(15, 17, 21, 0.09);
   --radius: 14px;
-  --wash-1: rgba(238, 42, 123, 0.05);
-  --wash-2: rgba(98, 40, 215, 0.05);
+  --wash-1: rgba(249, 115, 22, 0.06);
+  --wash-2: rgba(194, 65, 12, 0.05);
   --nav-bg: rgba(255, 255, 255, 0.85);
+
+  /* Three type families instead of one, matching how real social/trading
+     apps split roles: a humanist grotesque for body copy (close to X's
+     Chirp), a geometric sans for headings/brand (close to Instagram's
+     Proxima Nova headings), and a technical sans with real tabular
+     numerals for prices/gains — the "trading terminal" numeral treatment
+     Robinhood/Webull/moomoo all use. */
+  --font-body: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-heading: "Plus Jakarta Sans", var(--font-body);
+  --font-numeric: "Space Grotesk", var(--font-body);
 }
 
 html[data-theme="dark"] {
@@ -35,8 +45,8 @@ html[data-theme="dark"] {
   --danger: #ff5c74;
   --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px rgba(0, 0, 0, 0.45);
   --shadow-hover: 0 4px 10px rgba(0, 0, 0, 0.35), 0 18px 36px rgba(0, 0, 0, 0.5);
-  --wash-1: rgba(238, 42, 123, 0.09);
-  --wash-2: rgba(109, 139, 255, 0.09);
+  --wash-1: rgba(249, 115, 22, 0.1);
+  --wash-2: rgba(109, 139, 255, 0.08);
   --nav-bg: rgba(10, 12, 17, 0.85);
 }
 
@@ -52,7 +62,7 @@ input, textarea, select {
 
 body {
   margin: 0;
-  font-family: "Inter", -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   background:
     radial-gradient(720px 360px at 8% -10%, var(--wash-1), transparent 60%),
     radial-gradient(640px 320px at 100% 0%, var(--wash-2), transparent 55%),
@@ -80,6 +90,7 @@ body {
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.05rem;
   color: var(--text);
@@ -95,9 +106,8 @@ body {
   border-radius: 9px;
   background: var(--gradient);
   color: #fff;
-  font-weight: 800;
-  font-size: 0.9rem;
 }
+.brand-mark svg { width: 17px; height: 17px; }
 
 .nav-links { display: flex; align-items: center; gap: 0.15rem; }
 .nav-link {
@@ -160,6 +170,7 @@ html[data-theme="dark"] .theme-toggle .icon-moon { display: block; }
   padding: 1.5rem 1rem 4rem;
 }
 
+h1, h2, h3 { font-family: var(--font-heading); }
 h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 
 .avatar {
@@ -171,6 +182,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   border-radius: 50%;
   background: var(--gradient);
   color: #fff;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: 0.85rem;
   flex-shrink: 0;
@@ -277,7 +289,8 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .post-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
 .post-card::before,
 .feed-sidebar::before,
-.chart-card::before {
+.chart-card::before,
+.leaderboard-card::before {
   content: "";
   position: absolute;
   top: 0; left: 0; right: 0;
@@ -295,6 +308,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--text);
   text-decoration: none;
@@ -313,11 +327,12 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .summary-total.gain { background: var(--gain-bg); }
 .summary-total.loss { background: var(--loss-bg); }
 .summary-figure {
+  font-family: var(--font-numeric);
   font-size: 2.3rem;
-  font-weight: 800;
+  font-weight: 700;
   line-height: 1.1;
   font-variant-numeric: tabular-nums;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
 }
 .summary-total.gain .summary-figure { color: var(--gain); }
 .summary-total.loss .summary-figure { color: var(--loss); }
@@ -345,6 +360,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 }
 .holding-row:nth-child(even) { background: var(--bg); }
 .holding-row .holding-ticker {
+  font-family: var(--font-numeric);
   font-weight: 700;
   color: var(--text);
   font-size: 0.82rem;
@@ -352,6 +368,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 }
 .holding-row .holding-gain,
 .holding-row .unavailable {
+  font-family: var(--font-numeric);
   margin-left: auto;
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -426,18 +443,22 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .user-link-text { display: flex; flex-direction: column; }
 .user-bio { color: var(--muted); font-size: 0.8rem; }
 
-.container-wide { max-width: 960px; }
+.container-wide { max-width: 1440px; }
 
+/* Three columns: leaderboard | feed | friend search — spread across the
+   full page instead of a narrow centered column with dead space either side. */
 .feed-layout {
-  display: flex;
-  align-items: flex-start;
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 300px;
+  align-items: start;
   gap: 1.5rem;
 }
-.feed-main { flex: 1; min-width: 0; }
+.feed-main { min-width: 0; }
+
+.feed-leaderboard-col { position: sticky; top: 4.5rem; }
+.feed-leaderboard-col .leaderboard-card { margin-bottom: 0; }
 
 .feed-sidebar {
-  width: 260px;
-  flex-shrink: 0;
   background: var(--card-bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -494,6 +515,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 0.25rem 0.65rem;
+  font-family: var(--font-numeric);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -518,9 +540,14 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 }
 .sidebar-no-results { font-size: 0.85rem; margin-top: 0.5rem; }
 
-@media (max-width: 720px) {
-  .feed-layout { flex-direction: column; }
-  .feed-sidebar { width: 100%; position: static; }
+@media (max-width: 1280px) {
+  .feed-layout { grid-template-columns: 240px minmax(0, 1fr) 260px; }
+}
+
+@media (max-width: 980px) {
+  .feed-layout { grid-template-columns: 1fr; }
+  .feed-leaderboard-col,
+  .feed-sidebar { position: static; }
 }
 
 .news-grid {
@@ -566,7 +593,7 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   text-transform: uppercase;
   letter-spacing: 0.02em;
 }
-.news-headline { font-size: 1rem; margin: 0.3rem 0; }
+.news-headline { font-family: var(--font-heading); font-size: 1rem; margin: 0.3rem 0; }
 .news-summary {
   font-size: 0.85rem;
   color: var(--muted);
@@ -591,30 +618,37 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   background-position: center;
   background-color: var(--border);
 }
+
+/* Only this row overlaps the cover photo. The avatar's own border makes it
+   legible on any image; nothing else sits over the photo. */
+.profile-avatar-row {
+  padding: 0 1.3rem;
+  margin-top: -36px;
+  line-height: 0;
+}
+.profile-avatar-row .avatar-lg {
+  border: 4px solid var(--card-bg);
+  box-shadow: 0 2px 6px rgba(15, 17, 21, 0.15);
+}
+
+/* Text and actions live entirely in the solid card background below the
+   photo — never overlapping it, so they're always legible. */
 .profile-body {
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
   flex-wrap: wrap;
   gap: 1rem;
-  padding: 0 1.3rem 1.3rem;
-  margin-top: -38px;
+  padding: 0.6rem 1.3rem 1.3rem;
 }
-.profile-identity { display: flex; align-items: flex-end; gap: 1rem; }
-.profile-identity .avatar-lg {
-  border: 4px solid var(--card-bg);
-  box-shadow: 0 2px 6px rgba(15, 17, 21, 0.15);
-}
-.profile-identity-text { padding-bottom: 0.15rem; }
 .profile-header h1 { margin: 0; }
 .profile-bio { color: var(--muted); margin: 0.2rem 0; }
 .profile-stats { font-size: 0.9rem; color: var(--muted); margin: 0.2rem 0 0; }
-.profile-actions { display: flex; gap: 0.5rem; align-items: center; padding-bottom: 0.3rem; }
+.profile-actions { display: flex; gap: 0.5rem; align-items: center; padding-bottom: 0.1rem; }
 
 @media (max-width: 560px) {
-  .profile-body { margin-top: -30px; }
-  .profile-identity { align-items: center; }
-  .profile-actions { padding-bottom: 0; width: 100%; }
+  .profile-avatar-row { margin-top: -28px; }
+  .profile-actions { width: 100%; }
 }
 
 .chart-card {
@@ -731,9 +765,10 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 
 /* Ticker tape — a scrolling strip of live watchlist quotes, Robinhood/Webull style */
 .ticker-tape {
-  /* Fixed dark strip regardless of theme (like a physical ticker board),
-     not tied to --text — which would go light-on-light in dark mode. */
-  background: #14161c;
+  /* Matches the surrounding card theme (light or dark) instead of always
+     being a fixed dark strip that clashes with a light page. */
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: 0.6rem 0;
   margin-bottom: 1.2rem;
@@ -753,14 +788,78 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   align-items: baseline;
   gap: 0.4rem;
   flex-shrink: 0;
+  font-family: var(--font-numeric);
   font-size: 0.82rem;
   font-variant-numeric: tabular-nums;
-  color: rgba(255, 255, 255, 0.6);
+  color: var(--muted);
   white-space: nowrap;
 }
-.ticker-tape-item strong { color: #fff; font-weight: 700; }
+.ticker-tape-item strong { color: var(--text); font-weight: 700; }
 .ticker-tape-item .gain { color: var(--gain); }
 .ticker-tape-item .loss { color: var(--loss); }
+
+/* Feed leaderboard — tabbed Top Movers / Most Held / Top Portfolios card */
+.leaderboard-card {
+  position: relative;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.3rem 1.3rem 0.6rem;
+  margin-bottom: 1.2rem;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+.leaderboard-tabs {
+  display: flex;
+  gap: 0.9rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 0.4rem;
+  overflow-x: auto;
+}
+.leaderboard-tab {
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0 0 0.7rem;
+  margin-bottom: -1px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.leaderboard-tab:hover { color: var(--text); }
+.leaderboard-tab.active { color: var(--text); border-bottom-color: var(--primary); }
+
+.leaderboard-list { list-style: none; margin: 0; padding: 0.3rem 0; }
+.leaderboard-list[hidden] { display: none; }
+.leaderboard-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.45rem 0.1rem;
+  font-size: 0.85rem;
+  border-bottom: 1px solid var(--border);
+}
+.leaderboard-list li:last-child { border-bottom: none; }
+.lb-rank {
+  width: 1.4em;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.lb-name { font-family: var(--font-numeric); font-weight: 700; color: var(--text); text-decoration: none; }
+a.lb-name:hover { color: var(--primary); }
+.lb-value {
+  margin-left: auto;
+  font-family: var(--font-numeric);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.lb-value.gain { color: var(--gain); }
+.lb-value.loss { color: var(--loss); }
+.lb-empty { color: var(--muted); font-style: italic; }
 
 /* Sidebar "your portfolio" snapshot widget */
 .my-snapshot {
@@ -776,7 +875,8 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
 .my-snapshot.loss { background: var(--loss-bg); }
 .my-snapshot-label { font-size: 0.78rem; color: var(--muted); font-weight: 600; }
 .my-snapshot-figure {
-  font-weight: 800;
+  font-family: var(--font-numeric);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
   color: var(--gain);
 }
@@ -816,7 +916,8 @@ h1 { font-size: 1.4rem; letter-spacing: -0.01em; }
   margin-bottom: 0.5rem;
 }
 .chart-current-value {
-  font-weight: 800;
+  font-family: var(--font-numeric);
+  font-weight: 700;
   font-size: 1.1rem;
   font-variant-numeric: tabular-nums;
 }

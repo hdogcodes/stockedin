@@ -6,6 +6,7 @@ from flask_login import current_user, login_required
 from extensions import db
 from forms import CommentForm
 from images import cover_image_for
+from leaderboards import most_held_stocks, top_moving_stocks, top_portfolios
 from models import Comment, Follow, Like, Portfolio, User
 from prices import attach_stats, get_watchlist_quotes
 from snapshots import get_chart_series, record_snapshot
@@ -38,6 +39,12 @@ def feed():
         attach_stats([current_user.portfolio])
         my_stats = current_user.portfolio.stats
 
+    leaderboards = {
+        "movers": top_moving_stocks(),
+        "popular": most_held_stocks(),
+        "portfolios": top_portfolios(),
+    }
+
     return render_template(
         "feed.html",
         portfolios=portfolios,
@@ -45,6 +52,7 @@ def feed():
         users=users,
         my_stats=my_stats,
         watchlist=get_watchlist_quotes(),
+        leaderboards=leaderboards,
     )
 
 

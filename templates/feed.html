@@ -1,9 +1,13 @@
 {% extends "base.html" %}
-{% block title %}Feed — Portfolio Social{% endblock %}
+{% block title %}Feed — Stalkin'{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
   {% include "_ticker_tape.html" %}
   <div class="feed-layout">
+    <aside class="feed-leaderboard-col">
+      {% include "_leaderboard.html" %}
+    </aside>
+
     <div class="feed-main">
       <h1>Your feed</h1>
       {% if portfolios %}

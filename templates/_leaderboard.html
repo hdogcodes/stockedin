@@ -1,0 +1,49 @@
+{# Expects: leaderboards = {movers, popular, portfolios} #}
+<div class="leaderboard-card">
+  <h2 class="sidebar-title">Leaderboard</h2>
+  <div class="leaderboard-tabs" role="tablist">
+    <button type="button" class="leaderboard-tab active" data-target="movers">Movers</button>
+    <button type="button" class="leaderboard-tab" data-target="popular">Held</button>
+    <button type="button" class="leaderboard-tab" data-target="portfolios">Growth</button>
+  </div>
+
+  <ol class="leaderboard-list" data-panel="movers">
+    {% for row in leaderboards.movers %}
+      <li>
+        <span class="lb-rank">{{ loop.index }}</span>
+        <span class="lb-name">{{ row.ticker }}</span>
+        <span class="lb-value {{ 'gain' if row.day_change_pct >= 0 else 'loss' }}">
+          {{ "+" if row.day_change_pct >= 0 else "" }}{{ "%.1f"|format(row.day_change_pct) }}%
+        </span>
+      </li>
+    {% else %}
+      <li class="lb-empty">No price data yet.</li>
+    {% endfor %}
+  </ol>
+
+  <ol class="leaderboard-list" data-panel="popular" hidden>
+    {% for row in leaderboards.popular %}
+      <li>
+        <span class="lb-rank">{{ loop.index }}</span>
+        <span class="lb-name">{{ row.ticker }}</span>
+        <span class="lb-value">{{ row.holder_count }} holder{{ "s" if row.holder_count != 1 else "" }}</span>
+      </li>
+    {% else %}
+      <li class="lb-empty">No holdings yet.</li>
+    {% endfor %}
+  </ol>
+
+  <ol class="leaderboard-list" data-panel="portfolios" hidden>
+    {% for row in leaderboards.portfolios %}
+      <li>
+        <span class="lb-rank">{{ loop.index }}</span>
+        <a class="lb-name" href="{{ url_for('profile', username=row.username) }}">{{ row.username }}</a>
+        <span class="lb-value {{ 'gain' if row.gain_loss_pct >= 0 else 'loss' }}">
+          {{ "+" if row.gain_loss_pct >= 0 else "" }}{{ "%.1f"|format(row.gain_loss_pct) }}%
+        </span>
+      </li>
+    {% else %}
+      <li class="lb-empty">No portfolios yet.</li>
+    {% endfor %}
+  </ol>
+</div>
