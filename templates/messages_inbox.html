@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Messages — Portfolio Social{% endblock %}
+{% block content %}
+  <h1>Messages</h1>
+  {% if threads %}
+    <ul class="thread-list">
+      {% for t in threads %}
+        <li>
+          <a class="thread-row {{ 'unread' if t.unread_count else '' }}" href="{{ url_for('thread', username=t.friend.username) }}">
+            <span class="avatar">{{ t.friend.username[0]|upper }}</span>
+            <span class="thread-info">
+              <strong>{{ t.friend.username }}</strong>
+              {% if t.last_message %}
+                <span class="thread-preview">
+                  {{ "You: " if t.last_message.sender_id == current_user.id else "" }}{{ t.last_message.body }}
+                </span>
+              {% else %}
+                <span class="thread-preview empty">Say hello &mdash; you follow each other.</span>
+              {% endif %}
+            </span>
+            {% if t.unread_count %}<span class="unread-badge">{{ t.unread_count }}</span>{% endif %}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty-state">
+      No conversations yet. You can message anyone who follows you back &mdash;
+      follow someone from the <a href="{{ url_for('feed') }}">feed sidebar</a> and see if they follow back.
+    </p>
+  {% endif %}
+{% endblock %}

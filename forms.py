@@ -106,3 +106,10 @@ class CommentForm(FlaskForm):
         "Comment", validators=[DataRequired(), Length(max=280)]
     )
     submit = SubmitField("Post")
+
+
+class MessageForm(FlaskForm):
+    body = TextAreaField(
+        "Message", validators=[DataRequired(), Length(max=1000)]
+    )
+    submit = SubmitField("Send")

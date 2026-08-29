@@ -1,12 +1,13 @@
 """Feed, profile, follow/unfollow, and AJAX like/comment views."""
 
-from flask import abort, flash, jsonify, redirect, render_template, url_for
+from flask import abort, flash, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user, login_required
 
 from extensions import db
 from forms import CommentForm
 from models import Comment, Follow, Like, Portfolio, User
 from prices import attach_stats
+from snapshots import get_chart_series, record_snapshot
 
 
 @login_required
@@ -41,9 +42,28 @@ def profile(username):
     portfolios = [user.portfolio] if user.portfolio else []
     attach_stats(portfolios)
     comment_form = CommentForm()
+
+    chart_series = []
+    if user.portfolio is not None:
+        total_value = portfolios[0].stats.get("total_value")
+        record_snapshot(user.portfolio, total_value)
+        chart_series = get_chart_series(user.portfolio)
+
     return render_template(
-        "profile.html", profile_user=user, portfolios=portfolios, comment_form=comment_form
+        "profile.html",
+        profile_user=user,
+        portfolios=portfolios,
+        comment_form=comment_form,
+        chart_series=chart_series,
     )
+
+
+def _redirect_back(fallback_endpoint, **fallback_values):
+    # Keeps the user on whatever page they clicked Follow/Unfollow from
+    # (e.g. the feed sidebar) instead of always jumping to a profile page.
+    if request.referrer:
+        return redirect(request.referrer)
+    return redirect(url_for(fallback_endpoint, **fallback_values))
 
 
 @login_required
@@ -51,7 +71,7 @@ def follow(username):
     target = User.query.filter_by(username=username).first_or_404()
     if target.id == current_user.id:
         flash("You can't follow yourself.", "error")
-        return redirect(url_for("profile", username=username))
+        return _redirect_back("profile", username=username)
 
     already = Follow.query.filter_by(
         follower_id=current_user.id, followed_id=target.id
@@ -60,7 +80,7 @@ def follow(username):
         db.session.add(Follow(follower_id=current_user.id, followed_id=target.id))
         db.session.commit()
 
-    return redirect(url_for("profile", username=username))
+    return _redirect_back("profile", username=username)
 
 
 @login_required
@@ -70,7 +90,7 @@ def unfollow(username):
         follower_id=current_user.id, followed_id=target.id
     ).delete()
     db.session.commit()
-    return redirect(url_for("profile", username=username))
+    return _redirect_back("profile", username=username)
 
 
 @login_required

@@ -58,11 +58,14 @@
           {% for user in users %}
             <li class="user-row" data-username="{{ user.username|lower }}" data-tickers="{{ user.held_tickers|join(',')|lower }}">
               <a class="user-link" href="{{ url_for('profile', username=user.username) }}">
-                <strong>{{ user.username }}</strong>
-                {% if user.bio %}<span class="user-bio">{{ user.bio }}</span>{% endif %}
-                {% if user.held_tickers %}
-                  <span class="user-holdings">{{ user.held_tickers|join(', ') }}</span>
-                {% endif %}
+                <span class="avatar avatar-sm">{{ user.username[0]|upper }}</span>
+                <span class="user-link-text">
+                  <strong>{{ user.username }}</strong>
+                  {% if user.bio %}<span class="user-bio">{{ user.bio }}</span>{% endif %}
+                  {% if user.held_tickers %}
+                    <span class="user-holdings">{{ user.held_tickers|join(', ') }}</span>
+                  {% endif %}
+                </span>
               </a>
               {% if current_user.is_following(user) %}
                 <form method="post" action="{{ url_for('unfollow', username=user.username) }}">

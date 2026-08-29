@@ -2,14 +2,17 @@
 {% block title %}{{ profile_user.username }} — Portfolio Social{% endblock %}
 {% block content %}
   <header class="profile-header">
-    <div>
-      <h1>{{ profile_user.username }}</h1>
-      {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
-      <p class="profile-stats">
-        <strong>{{ profile_user.followers_count }}</strong> followers
-        &middot;
-        <strong>{{ profile_user.following_count }}</strong> following
-      </p>
+    <div class="profile-identity">
+      <span class="avatar avatar-lg">{{ profile_user.username[0]|upper }}</span>
+      <div>
+        <h1>{{ profile_user.username }}</h1>
+        {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
+        <p class="profile-stats">
+          <strong>{{ profile_user.followers_count }}</strong> followers
+          &middot;
+          <strong>{{ profile_user.following_count }}</strong> following
+        </p>
+      </div>
     </div>
     <div class="profile-actions">
       {% if profile_user.id == current_user.id %}
@@ -19,19 +22,30 @@
         {% else %}
           <a class="btn btn-primary" href="{{ url_for('portfolio_new') }}">Create your portfolio</a>
         {% endif %}
-      {% elif current_user.is_following(profile_user) %}
-        <form method="post" action="{{ url_for('unfollow', username=profile_user.username) }}">
-          <button type="submit" class="btn btn-outline">Unfollow</button>
-        </form>
       {% else %}
-        <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
-          <button type="submit" class="btn btn-primary">Follow</button>
-        </form>
+        {% if current_user.is_mutual_with(profile_user) %}
+          <a class="btn btn-outline" href="{{ url_for('thread', username=profile_user.username) }}">Message</a>
+        {% endif %}
+        {% if current_user.is_following(profile_user) %}
+          <form method="post" action="{{ url_for('unfollow', username=profile_user.username) }}">
+            <button type="submit" class="btn btn-outline">Unfollow</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
+            <button type="submit" class="btn btn-primary">Follow</button>
+          </form>
+        {% endif %}
       {% endif %}
     </div>
   </header>
 
   {% if portfolios %}
+    {% if chart_series|length > 1 %}
+      <div class="chart-card">
+        <h2 class="chart-title">Portfolio value over time</h2>
+        <div class="portfolio-chart" data-points='{{ chart_series|tojson }}'></div>
+      </div>
+    {% endif %}
     {% for portfolio in portfolios %}
       {% include "_post_card.html" %}
     {% endfor %}

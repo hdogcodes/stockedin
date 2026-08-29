@@ -59,6 +59,26 @@ class User(UserMixin, db.Model):
             is not None
         )
 
+    def is_mutual_with(self, other):
+        """True if each follows the other — the bar for being able to DM."""
+        if other is None or other.id == self.id:
+            return False
+        return self.is_following(other) and other.is_following(self)
+
+    @property
+    def mutual_friends(self):
+        """Users this account follows AND is followed back by, i.e. who it can DM."""
+        following_ids = {f.followed_id for f in self.following}
+        follower_ids = {f.follower_id for f in self.followers}
+        mutual_ids = following_ids & follower_ids
+        if not mutual_ids:
+            return []
+        return User.query.filter(User.id.in_(mutual_ids)).order_by(User.username).all()
+
+    @property
+    def unread_message_count(self):
+        return Message.query.filter_by(recipient_id=self.id, read_at=None).count()
+
     @property
     def following_count(self):
         return Follow.query.filter_by(follower_id=self.id).count()
@@ -99,6 +119,12 @@ class Portfolio(db.Model):
         back_populates="portfolio",
         cascade="all, delete-orphan",
         order_by="Comment.created_at",
+    )
+    snapshots = db.relationship(
+        "PortfolioSnapshot",
+        back_populates="portfolio",
+        cascade="all, delete-orphan",
+        order_by="PortfolioSnapshot.date",
     )
 
     @property
@@ -188,6 +214,48 @@ class Comment(db.Model):
 
     user = db.relationship("User", back_populates="comments")
     portfolio = db.relationship("Portfolio", back_populates="comments")
+
+
+class PortfolioSnapshot(db.Model):
+    """One recorded total-value data point for a portfolio on a given day.
+
+    Recorded (upserted) each time a portfolio is viewed with live prices
+    available, so the growth chart fills in naturally over time rather than
+    needing a separate cron job.
+    """
+
+    __tablename__ = "portfolio_snapshots"
+
+    id = db.Column(db.Integer, primary_key=True)
+    portfolio_id = db.Column(
+        db.Integer, db.ForeignKey("portfolios.id"), nullable=False
+    )
+    date = db.Column(db.Date, nullable=False)
+    total_value = db.Column(db.Float, nullable=False)
+    recorded_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+
+    portfolio = db.relationship("Portfolio", back_populates="snapshots")
+
+    __table_args__ = (
+        db.UniqueConstraint("portfolio_id", "date", name="one_snapshot_per_day"),
+    )
+
+
+class Message(db.Model):
+    """A direct message. Only exchanged between users who mutually follow
+    each other — enforced in the route, not here."""
+
+    __tablename__ = "messages"
+
+    id = db.Column(db.Integer, primary_key=True)
+    sender_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    recipient_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    body = db.Column(db.String(1000), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    read_at = db.Column(db.DateTime)
+
+    sender = db.relationship("User", foreign_keys=[sender_id])
+    recipient = db.relationship("User", foreign_keys=[recipient_id])
 
 
 @login_manager.user_loader

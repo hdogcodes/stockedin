@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 {% block title %}News — Portfolio Social{% endblock %}
+{% block container_class %}container-wide{% endblock %}
 {% block content %}
   <h1>Finance news</h1>
   {% if articles %}
-    <div class="news-grid">
+    <div class="news-grid" id="news-grid">
       {% for article in articles %}
-        <a class="news-card" href="{{ article.url }}" target="_blank" rel="noopener noreferrer">
+        <a class="news-card" href="{{ article.url }}" target="_blank" rel="noopener noreferrer" {% if loop.index0 >= 12 %}hidden{% endif %}>
           <img class="news-image" src="{{ article.image }}" alt="" loading="lazy">
           <div class="news-body">
             <span class="news-source">{{ article.source }}{% if article.published %} &middot; {{ article.published }}{% endif %}</span>
@@ -15,6 +16,9 @@
         </a>
       {% endfor %}
     </div>
+    {% if articles|length > 12 %}
+      <button type="button" id="news-load-more" class="btn btn-outline news-load-more">Load more</button>
+    {% endif %}
   {% else %}
     <p class="empty-state">No news available right now.</p>
   {% endif %}

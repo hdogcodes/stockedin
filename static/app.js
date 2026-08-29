@@ -8,6 +8,50 @@ function getCsrfToken(form) {
   return input ? input.value : null;
 }
 
+// Renders a portfolio value-over-time line chart as inline SVG — no
+// charting library needed for a single line with a filled area under it.
+function renderPortfolioChart(container) {
+  const points = JSON.parse(container.dataset.points || "[]");
+  if (points.length < 2) return;
+
+  const width = 640;
+  const height = 220;
+  const padX = 8;
+  const padY = 16;
+
+  const values = points.map((p) => p.value);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const range = max - min || 1;
+
+  const x = (i) => padX + (i / (points.length - 1)) * (width - padX * 2);
+  const y = (v) => height - padY - ((v - min) / range) * (height - padY * 2);
+
+  const linePath = points.map((p, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(p.value).toFixed(1)}`).join(" ");
+  const areaPath = `${linePath} L${x(points.length - 1).toFixed(1)},${height - padY} L${x(0).toFixed(1)},${height - padY} Z`;
+
+  const up = points[points.length - 1].value >= points[0].value;
+  const color = up ? "var(--gain)" : "var(--loss)";
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.classList.add("chart-svg");
+  svg.innerHTML = `
+    <path d="${areaPath}" fill="${color}" fill-opacity="0.12" stroke="none"></path>
+    <path d="${linePath}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"></path>
+  `;
+  container.innerHTML = "";
+  container.appendChild(svg);
+
+  const labels = document.createElement("div");
+  labels.className = "chart-labels";
+  labels.innerHTML = `<span>${points[0].date}</span><span>${points[points.length - 1].date}</span>`;
+  container.appendChild(labels);
+}
+
+document.querySelectorAll(".portfolio-chart").forEach(renderPortfolioChart);
+
 // Wires a ticker/company-name autocomplete dropdown onto any text input.
 // Used by both the add-holding form's ticker field and the sidebar's
 // stock-filter search — each gets its own independent debounce/nav state.
@@ -186,6 +230,18 @@ if (friendSearch) {
       }
     );
   }
+}
+
+const newsLoadMore = document.getElementById("news-load-more");
+if (newsLoadMore) {
+  const NEWS_PAGE_SIZE = 12;
+  newsLoadMore.addEventListener("click", () => {
+    const hiddenCards = document.querySelectorAll("#news-grid .news-card[hidden]");
+    hiddenCards.forEach((card, i) => {
+      if (i < NEWS_PAGE_SIZE) card.hidden = false;
+    });
+    if (hiddenCards.length <= NEWS_PAGE_SIZE) newsLoadMore.hidden = true;
+  });
 }
 
 document.addEventListener("click", async (event) => {

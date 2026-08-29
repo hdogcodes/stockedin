@@ -2,6 +2,7 @@
 <article class="post-card" id="portfolio-{{ portfolio.id }}">
   <header class="post-header">
     <a class="post-owner" href="{{ url_for('profile', username=portfolio.owner.username) }}">
+      <span class="avatar">{{ portfolio.owner.username[0]|upper }}</span>
       {{ portfolio.owner.username }}
     </a>
     <span class="post-date">{{ portfolio.created_at.strftime('%b %d, %Y') }}</span>
@@ -64,6 +65,7 @@
     <ul class="comment-list">
       {% for comment in portfolio.comments %}
         <li class="comment">
+          <span class="avatar avatar-sm">{{ comment.user.username[0]|upper }}</span>
           <a href="{{ url_for('profile', username=comment.user.username) }}">{{ comment.user.username }}</a>
           <span class="comment-body">{{ comment.body }}</span>
           <span class="comment-date">{{ comment.created_at.strftime('%b %d, %Y %H:%M') }}</span>
