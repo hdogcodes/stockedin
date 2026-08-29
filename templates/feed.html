@@ -2,6 +2,7 @@
 {% block title %}Feed — Portfolio Social{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
+  {% include "_ticker_tape.html" %}
   <div class="feed-layout">
     <div class="feed-main">
       <h1>Your feed</h1>
@@ -10,13 +11,26 @@
           {% include "_post_card.html" %}
         {% endfor %}
       {% else %}
-        <p class="empty-state">
-          You're not following anyone yet. Search for people to follow &rarr;
-        </p>
+        <div class="empty-state-card">
+          <span class="empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+          </span>
+          <p>You're not following anyone yet.<br>Search for people to follow in the sidebar &rarr;</p>
+        </div>
       {% endif %}
     </div>
 
     <aside class="feed-sidebar">
+      {% if my_stats and my_stats.total_gain_loss_pct is not none %}
+        <a class="my-snapshot {{ 'gain' if my_stats.total_gain_loss >= 0 else 'loss' }}" href="{{ url_for('profile', username=current_user.username) }}">
+          <span class="my-snapshot-label">Your portfolio</span>
+          <span class="my-snapshot-figure">
+            {{ "+" if my_stats.total_gain_loss >= 0 else "" }}${{ "%.2f"|format(my_stats.total_gain_loss) }}
+            <span class="my-snapshot-pct">({{ "%.1f"|format(my_stats.total_gain_loss_pct) }}%)</span>
+          </span>
+        </a>
+      {% endif %}
+
       <h2 class="sidebar-title">Find friends</h2>
       <input
         type="text"

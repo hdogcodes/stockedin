@@ -155,6 +155,22 @@ def prefetch_quotes(tickers):
             _cache[ticker] = (quote, time.time(), quote is not None)
 
 
+WATCHLIST_TICKERS = ["AAPL", "MSFT", "GOOGL", "AMZN", "NVDA", "TSLA", "META", "SPY"]
+
+
+def get_watchlist_quotes():
+    """Quotes for a fixed set of well-known tickers, for the ticker-tape
+    strip. Reuses the same 5-minute cache as everything else, so this adds
+    no real request volume beyond the first render after a cache miss."""
+    prefetch_quotes(WATCHLIST_TICKERS)
+    quotes = []
+    for ticker in WATCHLIST_TICKERS:
+        quote = get_quote(ticker)
+        if quote is not None:
+            quotes.append({"ticker": ticker, **quote})
+    return quotes
+
+
 def search_symbols(query):
     """Look up tickers by symbol OR company name, e.g. "amazon" -> AMZN.
 

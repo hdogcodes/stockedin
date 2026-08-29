@@ -6,6 +6,7 @@ from flask import render_template
 from flask_login import login_required
 
 from news import get_market_news
+from prices import get_watchlist_quotes
 
 
 @login_required
@@ -16,7 +17,7 @@ def news():
         article["published"] = (
             datetime.utcfromtimestamp(ts).strftime("%b %d, %Y %H:%M") if ts else ""
         )
-    return render_template("news.html", articles=articles)
+    return render_template("news.html", articles=articles, watchlist=get_watchlist_quotes())
 
 
 def register(app):

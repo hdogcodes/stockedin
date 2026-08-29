@@ -5,6 +5,7 @@ from flask_login import current_user, login_required, login_user, logout_user
 
 from extensions import db
 from forms import LoginForm, SignupForm
+from images import AUTH_HERO_IMAGE
 from models import User
 
 
@@ -26,7 +27,7 @@ def signup():
         flash("Welcome! Start by creating your portfolio.", "success")
         return redirect(url_for("portfolio_new"))
 
-    return render_template("signup.html", form=form)
+    return render_template("signup.html", form=form, auth_hero_image=AUTH_HERO_IMAGE)
 
 
 def login():
@@ -49,7 +50,7 @@ def login():
                 next_page = url_for("feed")
             return redirect(next_page)
 
-    return render_template("login.html", form=form)
+    return render_template("login.html", form=form, auth_hero_image=AUTH_HERO_IMAGE)
 
 
 @login_required

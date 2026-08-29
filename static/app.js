@@ -8,6 +8,15 @@ function getCsrfToken(form) {
   return input ? input.value : null;
 }
 
+const themeToggle = document.getElementById("theme-toggle");
+if (themeToggle) {
+  themeToggle.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem("theme", next);
+  });
+}
+
 // Renders a portfolio value-over-time line chart as inline SVG — no
 // charting library needed for a single line with a filled area under it.
 function renderPortfolioChart(container) {

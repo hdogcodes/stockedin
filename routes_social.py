@@ -5,8 +5,9 @@ from flask_login import current_user, login_required
 
 from extensions import db
 from forms import CommentForm
+from images import cover_image_for
 from models import Comment, Follow, Like, Portfolio, User
-from prices import attach_stats
+from prices import attach_stats, get_watchlist_quotes
 from snapshots import get_chart_series, record_snapshot
 
 
@@ -31,8 +32,19 @@ def feed():
         user.held_tickers = (
             sorted({h.ticker for h in user.portfolio.holdings}) if user.portfolio else []
         )
+
+    my_stats = None
+    if current_user.portfolio is not None:
+        attach_stats([current_user.portfolio])
+        my_stats = current_user.portfolio.stats
+
     return render_template(
-        "feed.html", portfolios=portfolios, comment_form=comment_form, users=users
+        "feed.html",
+        portfolios=portfolios,
+        comment_form=comment_form,
+        users=users,
+        my_stats=my_stats,
+        watchlist=get_watchlist_quotes(),
     )
 
 
@@ -55,6 +67,8 @@ def profile(username):
         portfolios=portfolios,
         comment_form=comment_form,
         chart_series=chart_series,
+        watchlist=get_watchlist_quotes(),
+        cover_image=cover_image_for(user.username),
     )
 
 

@@ -1,0 +1,18 @@
+{# Expects: watchlist (list of {ticker, price, day_change_pct}) #}
+{% if watchlist %}
+  <div class="ticker-tape">
+    <div class="ticker-tape-track">
+      {% for q in watchlist %}
+        <span class="ticker-tape-item">
+          <strong>{{ q.ticker }}</strong>
+          <span>${{ "%.2f"|format(q.price) }}</span>
+          {% if q.day_change_pct is not none %}
+            <span class="{{ 'gain' if q.day_change_pct >= 0 else 'loss' }}">
+              {{ "+" if q.day_change_pct >= 0 else "" }}{{ "%.1f"|format(q.day_change_pct) }}%
+            </span>
+          {% endif %}
+        </span>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}

@@ -1,48 +1,57 @@
 {% extends "base.html" %}
 {% block title %}{{ profile_user.username }} — Portfolio Social{% endblock %}
 {% block content %}
+  {% include "_ticker_tape.html" %}
   <header class="profile-header">
-    <div class="profile-identity">
-      <span class="avatar avatar-lg">{{ profile_user.username[0]|upper }}</span>
-      <div>
-        <h1>{{ profile_user.username }}</h1>
-        {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
-        <p class="profile-stats">
-          <strong>{{ profile_user.followers_count }}</strong> followers
-          &middot;
-          <strong>{{ profile_user.following_count }}</strong> following
-        </p>
+    <div class="profile-cover" style="background-image: url('{{ cover_image }}')"></div>
+    <div class="profile-body">
+      <div class="profile-identity">
+        <span class="avatar avatar-lg">{{ profile_user.username[0]|upper }}</span>
+        <div class="profile-identity-text">
+          <h1>{{ profile_user.username }}</h1>
+          {% if profile_user.bio %}<p class="profile-bio">{{ profile_user.bio }}</p>{% endif %}
+          <p class="profile-stats">
+            <strong>{{ profile_user.followers_count }}</strong> followers
+            &middot;
+            <strong>{{ profile_user.following_count }}</strong> following
+          </p>
+        </div>
       </div>
-    </div>
-    <div class="profile-actions">
-      {% if profile_user.id == current_user.id %}
-        {% if profile_user.portfolio %}
-          <a class="btn btn-outline" href="{{ url_for('portfolio_edit') }}">Edit portfolio</a>
-          <a class="btn btn-primary" href="{{ url_for('holding_new') }}">Add holding</a>
+      <div class="profile-actions">
+        {% if profile_user.id == current_user.id %}
+          {% if profile_user.portfolio %}
+            <a class="btn btn-outline" href="{{ url_for('portfolio_edit') }}">Edit portfolio</a>
+            <a class="btn btn-primary" href="{{ url_for('holding_new') }}">Add holding</a>
+          {% else %}
+            <a class="btn btn-primary" href="{{ url_for('portfolio_new') }}">Create your portfolio</a>
+          {% endif %}
         {% else %}
-          <a class="btn btn-primary" href="{{ url_for('portfolio_new') }}">Create your portfolio</a>
+          {% if current_user.is_mutual_with(profile_user) %}
+            <a class="btn btn-outline" href="{{ url_for('thread', username=profile_user.username) }}">Message</a>
+          {% endif %}
+          {% if current_user.is_following(profile_user) %}
+            <form method="post" action="{{ url_for('unfollow', username=profile_user.username) }}">
+              <button type="submit" class="btn btn-outline">Unfollow</button>
+            </form>
+          {% else %}
+            <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
+              <button type="submit" class="btn btn-primary">Follow</button>
+            </form>
+          {% endif %}
         {% endif %}
-      {% else %}
-        {% if current_user.is_mutual_with(profile_user) %}
-          <a class="btn btn-outline" href="{{ url_for('thread', username=profile_user.username) }}">Message</a>
-        {% endif %}
-        {% if current_user.is_following(profile_user) %}
-          <form method="post" action="{{ url_for('unfollow', username=profile_user.username) }}">
-            <button type="submit" class="btn btn-outline">Unfollow</button>
-          </form>
-        {% else %}
-          <form method="post" action="{{ url_for('follow', username=profile_user.username) }}">
-            <button type="submit" class="btn btn-primary">Follow</button>
-          </form>
-        {% endif %}
-      {% endif %}
+      </div>
     </div>
   </header>
 
   {% if portfolios %}
     {% if chart_series|length > 1 %}
       <div class="chart-card">
-        <h2 class="chart-title">Portfolio value over time</h2>
+        <div class="chart-card-header">
+          <h2 class="chart-title">Portfolio value over time</h2>
+          {% if portfolios[0].stats.total_value is not none %}
+            <span class="chart-current-value">${{ "%.2f"|format(portfolios[0].stats.total_value) }}</span>
+          {% endif %}
+        </div>
         <div class="portfolio-chart" data-points='{{ chart_series|tojson }}'></div>
       </div>
     {% endif %}
@@ -50,12 +59,17 @@
       {% include "_post_card.html" %}
     {% endfor %}
   {% else %}
-    <p class="empty-state">
-      {% if profile_user.id == current_user.id %}
-        You haven't created a portfolio yet.
-      {% else %}
-        {{ profile_user.username }} hasn't created a portfolio yet.
-      {% endif %}
-    </p>
+    <div class="empty-state-card">
+      <span class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 3v18h18"/><path d="M7 15l4-6 3 3 5-8"/></svg>
+      </span>
+      <p>
+        {% if profile_user.id == current_user.id %}
+          You haven't created a portfolio yet.
+        {% else %}
+          {{ profile_user.username }} hasn't created a portfolio yet.
+        {% endif %}
+      </p>
+    </div>
   {% endif %}
 {% endblock %}

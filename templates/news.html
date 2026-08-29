@@ -2,6 +2,7 @@
 {% block title %}News — Portfolio Social{% endblock %}
 {% block container_class %}container-wide{% endblock %}
 {% block content %}
+  {% include "_ticker_tape.html" %}
   <h1>Finance news</h1>
   {% if articles %}
     <div class="news-grid" id="news-grid">
