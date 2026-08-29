@@ -98,16 +98,11 @@ body {
   letter-spacing: -0.01em;
 }
 .brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 9px;
-  background: var(--gradient);
-  color: #fff;
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
-.brand-mark svg { width: 17px; height: 17px; }
 
 .nav-links { display: flex; align-items: center; gap: 0.15rem; }
 .nav-link {
@@ -938,6 +933,7 @@ a.lb-name:hover { color: var(--primary); }
   justify-content: center;
   padding: 3rem;
 }
+.auth-pitch-logo { width: 56px; height: 56px; object-fit: contain; margin-bottom: 1rem; }
 .auth-pitch h1 { font-size: 2.4rem; margin: 0 0 0.8rem; letter-spacing: -0.02em; }
 .auth-pitch p { font-size: 1.05rem; opacity: 0.92; max-width: 26em; margin: 0 0 2rem; }
 .auth-pitch-stats { list-style: none; padding: 0; margin: 0; display: flex; gap: 2rem; }

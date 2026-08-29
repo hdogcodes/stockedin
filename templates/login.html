@@ -1,9 +1,10 @@
 {% extends "base.html" %}
-{% block title %}Log in — Stalkin'{% endblock %}
+{% block title %}Log in — Stockedin{% endblock %}
 {% block container_class %}container-auth{% endblock %}
 {% block content %}
   <div class="auth-layout">
     <div class="auth-pitch" style="background-image: linear-gradient(rgba(10,12,20,.55), rgba(10,12,20,.75)), url('{{ auth_hero_image }}')">
+      <img class="auth-pitch-logo" src="{{ url_for('static', filename='images/logo-icon.png') }}" alt="">
       <h1>Invest out loud.</h1>
       <p>Share your real holdings, follow friends' portfolios, and see who's actually beating the market.</p>
       <ul class="auth-pitch-stats">
